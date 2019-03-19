@@ -7,7 +7,6 @@ from typing import List, Optional, Set, Iterator, Union
 
 from aiohttp import ClientSession
 from lxml import etree
-from quart import current_app
 
 from wpoke import exceptions as general_exceptions
 from wpoke.validators.url import validate_url
@@ -34,7 +33,8 @@ async def fetch_html_body(session: ClientSession, url: str, **params):
     :param params:
     :return:
     """
-    http_request_config = current_app.config['HTTP_REQUEST'].copy()
+    # http_request_config = current_app.config['HTTP_REQUEST'].copy()
+    http_request_config = {}
     http_request_config.update(params)
 
     async with session.get(url, **http_request_config) as response:
@@ -69,7 +69,7 @@ def extract_info_from_css(css_content: str) -> WPThemeMetadata:
     css_content = css_content.replace('\r', '\n')
 
     for k, v in WPThemeMetadata.get_metadata_schema().items():
-        regex_ = f"^[ \t\/*#@]*{v}:(?P<meta_value>.*)$"  # https://github.com/WordPress/WordPress/blob/aab929b8d619bde14495a97cdc1eb7bdf1f1d487/wp-includes/functions.php#L5182
+        regex_ = f"^[ \t/*#@]*{v}:(?P<meta_value>.*)$"  # https://github.com/WordPress/WordPress/blob/aab929b8d619bde14495a97cdc1eb7bdf1f1d487/wp-includes/functions.php#L5182
         regex = re.compile(regex_, re.IGNORECASE | re.M)
         match = re.search(regex, css_content)
 
@@ -161,7 +161,8 @@ def extract_theme_path_by_global_regex(url: str,
 
 
 async def get_screenshot(session: ClientSession, url: str) -> Optional[str]:
-    http_request_config = current_app.config['HTTP_REQUEST'].copy()
+    # http_request_config = current_app.config['HTTP_REQUEST'].copy()
+    http_request_config = {}
 
     for img_candidate_extension in ['jpeg', 'png', 'jpg']:
         screenshot_url = f'{url}screenshot.{img_candidate_extension}'

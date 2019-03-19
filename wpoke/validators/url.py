@@ -2,9 +2,9 @@ import re
 
 import ipaddress
 
-from wpinfo.exceptions import ValidationError
+from wpoke.exceptions import ValidationError
 
-from wpinfo.validators import EMPTY_VALUES
+from wpoke.validators import EMPTY_VALUES
 
 
 # Mostly stolen from django! xD

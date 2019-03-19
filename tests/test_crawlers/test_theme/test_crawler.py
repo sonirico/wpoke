@@ -12,14 +12,13 @@ from wpoke.crawlers.theme.crawler import remove_duplicated_theme_urls
 
 
 @pytest.mark.asyncio
-async def test_get_screenshot(app):
-    async with app.app_context():
-        session = CoroutineMock()
-        session.head.return_value.__aenter__.return_value.status = 200
-        payload = 'http://wpoke.app/wp-content/themes/hola/'
-        actual = await get_screenshot(session, payload)
-        expected = f'{payload}screenshot.jpeg'
-        assert actual == expected
+async def test_get_screenshot():
+    session = CoroutineMock()
+    session.head.return_value.__aenter__.return_value.status = 200
+    payload = 'http://wpoke.app/wp-content/themes/hola/'
+    actual = await get_screenshot(session, payload)
+    expected = f'{payload}screenshot.jpeg'
+    assert actual == expected
 
 
 @pytest.mark.parametrize("actual, expected", [
