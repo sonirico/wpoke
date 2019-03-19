@@ -1,0 +1,25 @@
+/*
+Theme Name:Mana
+Theme URI:http://themeforest.net/item/mana-responsive-multipurpose-theme/5895568
+Description:Fully Responsive Corporate Theme For Your Business
+Author:ThemeTon
+Author URI:http://www.themeton.com
+Version:1.9.12
+License:
+License URI:http://themeforest.net/licenses
+Tags:one-column, two-columns, left-sidebar, right-sidebar, fixed-width, flexible-width, custom-background, custom-colors, custom-menu, featured-image-header, featured-images, post-formats, sticky-post, theme-options, translation-ready
+*/
+
+
+/*	Core
+        ----------------------------------------------------
+*/
+body {
+    font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.5em;
+    color: #666;
+    font-weight: 100;
+    -webkit-font-smoothing: antialiased !important;
+    text-rendering: optimizelegibility;
+}

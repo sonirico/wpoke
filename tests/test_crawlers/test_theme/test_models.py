@@ -1,0 +1,23 @@
+import unittest
+
+from wpoke.crawlers.theme.models import WPThemeMetadata
+
+
+class TestWPThemeMetadata(unittest.TestCase):
+    def test_serialize_empty_values(self):
+        w = WPThemeMetadata()
+
+        w_serialized = w.deserialize()
+
+        self.assertIsInstance(w_serialized['tags'], list)
+        self.assertIsNone(w_serialized['theme_name'])
+
+    def test_serialize_tags_field(self):
+        w = WPThemeMetadata()
+
+        w.tags = 'hacking, programming  , devops'
+
+        w_serialized = w.deserialize()
+
+        self.assertListEqual(w_serialized['tags'], ['hacking', 'programming',
+                                                    'devops'])
