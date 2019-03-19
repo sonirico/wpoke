@@ -16,3 +16,8 @@ __pycache__/
 # Environs
 venv/
 env/
+
+# Dist/build assets
+*.egg-info/
+build/
+dist/
