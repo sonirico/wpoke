@@ -71,7 +71,7 @@ class WPThemeMetadata(object):
     def set_featured_image(self, img_link):
         self.featured_image = img_link
 
-    def deserialize(self) -> dict:
+    def serialize(self) -> dict:
         serializer = WPThemeMetadataSerializer(self)
 
         return serializer.data
