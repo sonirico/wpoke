@@ -46,7 +46,8 @@ async def fetch_html_body(session: ClientSession, url: str, **params):
 
 
 async def fetch_style_css(session: ClientSession, url: str, **params):
-    http_request_config = current_app.config['HTTP_REQUEST'].copy()
+    # http_request_config = current_app.config['HTTP_REQUEST'].copy()
+    http_request_config = {}
     http_request_config.update(params)
 
     async with session.get(url, **http_request_config) as response:
