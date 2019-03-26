@@ -2,9 +2,9 @@ import argparse
 import asyncio
 import json
 import sys
+import uvloop
 
 from wpoke.crawlers.theme.crawler import get_theme_metadata_by_style_css
-
 
 async def check_theme(target):
     result = await get_theme_metadata_by_style_css(target)
@@ -29,6 +29,8 @@ async def main():
 
 if __name__ == '__main__':
     try:
+        asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+
         loop = asyncio.get_event_loop()
         loop.run_until_complete(main())
     except KeyboardInterrupt:
