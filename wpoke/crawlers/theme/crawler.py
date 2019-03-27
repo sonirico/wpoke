@@ -10,6 +10,7 @@ from lxml import etree
 
 from wpoke import exceptions as general_exceptions
 from wpoke.validators.url import validate_url
+from wpoke.conf import settings
 
 from .models import WPThemeMetadata
 from .exceptions import *
@@ -25,19 +26,14 @@ def raise_on_failure(status_code: int, has_body: bool) -> None:
         raise general_exceptions.TargetInternalServerError
 
 
-async def fetch_html_body(session: ClientSession, url: str, **params):
+async def fetch_html_body(session: ClientSession, url: str):
     """ Encapsulates request/response lifecycle management
 
     :param session:
     :param url:
-    :param params:
     :return:
     """
-    # http_request_config = current_app.config['HTTP_REQUEST'].copy()
-    http_request_config = {}
-    http_request_config.update(params)
-
-    async with session.get(url, **http_request_config) as response:
+    async with session.get(url, **settings.request_config) as response:
         body = await response.text()
 
         raise_on_failure(response.status, bool(body))
@@ -46,11 +42,7 @@ async def fetch_html_body(session: ClientSession, url: str, **params):
 
 
 async def fetch_style_css(session: ClientSession, url: str, **params):
-    # http_request_config = current_app.config['HTTP_REQUEST'].copy()
-    http_request_config = {}
-    http_request_config.update(params)
-
-    async with session.get(url, **http_request_config) as response:
+    async with session.get(url, **settings.request_config) as response:
         body = await response.text()
         body_length = len(body) if body else 0
 
@@ -162,14 +154,11 @@ def extract_theme_path_by_global_regex(url: str,
 
 
 async def get_screenshot(session: ClientSession, url: str) -> Optional[str]:
-    # http_request_config = current_app.config['HTTP_REQUEST'].copy()
-    http_request_config = {}
-
     for img_candidate_extension in ['jpeg', 'png', 'jpg']:
         screenshot_url = f'{url}screenshot.{img_candidate_extension}'
 
         async with session.head(screenshot_url,
-                                **http_request_config) as response:
+                                **settings.request_config) as response:
             if 200 <= response.status <= 299:
                 return screenshot_url
     return None
@@ -183,10 +172,10 @@ async def add_extra_features(session, url, model):
     return model
 
 
-async def get_theme_metadata_by_style_css(url: str) -> List[WPThemeMetadata]:
+async def get_theme(url: str) -> List[WPThemeMetadata]:
     try:
         async with ClientSession() as session:
-            html_content = await fetch_html_body(session, url, timeout=5)
+            html_content = await fetch_html_body(session, url)
 
             if not html_content:
                 raise general_exceptions.MalformedBodyException
@@ -200,14 +189,17 @@ async def get_theme_metadata_by_style_css(url: str) -> List[WPThemeMetadata]:
 
             for candidate_url in candidates:
                 style_css_path = candidate_url + 'style.css'
-                css_content = await fetch_style_css(session, style_css_path,
-                                                    timeout=2)
+                css_content = await fetch_style_css(session,
+                                                    style_css_path,
+                                                    **settings.request_config)
+
                 try:
                     theme_model = extract_info_from_css(css_content)
                 except BundledThemeException:
                     continue
                 else:
-                    theme_model = await add_extra_features(session, candidate_url,
+                    theme_model = await add_extra_features(session,
+                                                           candidate_url,
                                                            theme_model)
                     theme_models.append(theme_model)
 

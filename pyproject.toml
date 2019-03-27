@@ -12,6 +12,7 @@ lxml = "^4.3"
 ipaddress = "^1.0"
 uvloop = "^0.12.1"
 aiohttp = "^3.5"
+dynaconf = "^1.2"
 
 [tool.poetry.dev-dependencies]
 pytest-asyncio = "^0.10.0"

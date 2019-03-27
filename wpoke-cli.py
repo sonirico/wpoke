@@ -4,14 +4,16 @@ import json
 import sys
 import uvloop
 
-from wpoke.crawlers.theme.crawler import get_theme_metadata_by_style_css
+from wpoke.crawlers.theme.crawler import get_theme
 from wpoke import exceptions as generic_exceptions
 from wpoke.crawlers.theme import exceptions as theme_exceptions
+
+from wpoke.conf import configure
 
 
 async def check_theme(target):
     try:
-        result = await get_theme_metadata_by_style_css(target)
+        result = await get_theme(target)
     except theme_exceptions.BundledThemeException:
         print("The site seems to be compiled by packaging tools like webpack")
     except generic_exceptions.TargetTimeout:
@@ -26,11 +28,17 @@ async def main():
     parser.add_argument('--theme', dest='poke_theme',
                         action='store_const', const=check_theme,
                         required=False)
-    parser.add_argument('--url', metavar='U', type=str, dest='target',
+    parser.add_argument('--url',  type=str, dest='target',
                         help='target WordPress site',
                         required=True)
+    parser.add_argument('--user-agent', type=str, dest='user_agent',
+                        help='user agent to use',
+                        required=False)
 
     args = parser.parse_args()
+
+    if args.user_agent:
+        configure('user_agent', args.user_agent)
 
     if args.poke_theme:
         print(await args.poke_theme(args.target))
