@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "wpoke"
 version = "0.1.0"
-description = "Wordpress information gathering tool"
+description = "WordPress information gathering tool"
 authors = ["Marcos <marsanben92@gmail.com>"]
 license = "MIT"
 
