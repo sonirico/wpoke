@@ -23,10 +23,12 @@ async def check_theme(target):
                           indent=4)
 
 
-async def main():
-    parser = argparse.ArgumentParser(description='WordPress info gathering tool')
-    parser.add_argument('url', help='Target WordPress site')
+def get_cli_options():
+    parser = argparse.ArgumentParser(
+        description='WordPress information gathering tool')
+    parser.add_argument('url', help='Target WordPress site. Can be any URL')
     parser.add_argument('-t', '--theme', dest='poke_theme',
+                        help='Display theme information',
                         action='store_const', const=check_theme,
                         required=False)
     parser.add_argument('-u', '--user-agent', type=str, dest='user_agent',
@@ -35,14 +37,18 @@ async def main():
     parser.add_argument('-f', '--format', type=str, dest='render_format',
                         help='Output format. {json|cmd}',
                         required=False)
+    return parser.parse_args()
 
-    args = parser.parse_args()
 
-    if args.user_agent:
-        configure('user_agent', args.user_agent)
+async def main():
+    options = get_cli_options()
 
-    if args.poke_theme:
-        print(await args.poke_theme(args.url))
+    if options.user_agent:
+        configure('user_agent', options.user_agent)
+
+    if options.poke_theme:
+        theme_data = await options.poke_theme(options.url)
+        print(theme_data)
 
 
 if __name__ == '__main__':
