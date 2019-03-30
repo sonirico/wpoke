@@ -1,2 +1,1 @@
-
 EMPTY_VALUES = ('', (), [], {}, None)

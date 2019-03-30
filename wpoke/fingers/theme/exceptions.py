@@ -1,5 +1,3 @@
-
-
 class ThemePathMissingException(Exception):
     pass
 

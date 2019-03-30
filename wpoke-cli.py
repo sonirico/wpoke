@@ -1,54 +1,82 @@
 import argparse
 import asyncio
-import json
 import sys
 import uvloop
 
-from wpoke.crawlers.theme.crawler import get_theme
-from wpoke import exceptions as generic_exceptions
-from wpoke.crawlers.theme import exceptions as theme_exceptions
-
-from wpoke.conf import configure
-
-
-async def check_theme(target):
-    try:
-        result = await get_theme(target)
-    except theme_exceptions.BundledThemeException:
-        print("The site seems to be compiled by packaging tools like webpack")
-    except generic_exceptions.TargetTimeout:
-        print("The request exceeded configured time limit of %s" % str(2))
-    else:
-        return json.dumps([theme_model.serialize() for theme_model in result],
-                          indent=4)
+from wpoke.conf import configure, settings
+from wpoke.loader import finger_registry
 
 
 def get_cli_options():
     parser = argparse.ArgumentParser(
         description='WordPress information gathering tool')
     parser.add_argument('url', help='Target WordPress site. Can be any URL')
-    parser.add_argument('-t', '--theme', dest='poke_theme',
-                        help='Display theme information',
-                        action='store_const', const=check_theme,
-                        required=False)
-    parser.add_argument('-u', '--user-agent', type=str, dest='user_agent',
+    parser.add_argument('-u', '--user-agent', type=str, dest='useragent',
                         help='User agent to use',
                         required=False)
     parser.add_argument('-f', '--format', type=str, dest='render_format',
                         help='Output format. {json|cmd}',
                         required=False)
+
+    for lookup_key, finger in finger_registry:
+        short_arg_name = getattr(finger.Cli, 'short_flag', None)
+        long_arg_name = getattr(finger.Cli, 'long_flag', None)
+        help_text = getattr(finger.Cli, 'help_text', None)
+        required = getattr(finger.Cli, 'required', False)
+
+        pargs = []
+        pkwargs = {'dest': lookup_key, 'action': 'store_true'}
+
+        if short_arg_name:
+            pargs.append(short_arg_name)
+        if long_arg_name:
+            pargs.append(long_arg_name)
+
+        if help_text:
+            pkwargs['help'] = help_text
+        if required is not None:
+            pkwargs['required'] = required
+
+        import ipdb;ipdb.set_trace()
+
+        parser.add_argument(*pargs, **pkwargs)
+
     return parser.parse_args()
 
 
+def load_settings(cli_options):
+    # User-Agent http header
+    if cli_options.useragent:
+        configure('useragent', cli_options.useragent)
+    # Target timeout
+    # if cli_options.timeout
+    # configure('timeout', cli_options.timeout)
+
+
+def load_plugins():
+    finger_registry.autodiscover_fingers(mods=['theme'])
+
+
+def load_plugin_options():
+    pass
+
+
 async def main():
-    options = get_cli_options()
+    load_plugins()
+    load_plugin_options()
+    cli_options = get_cli_options()
+    load_settings(cli_options)
+    poke_result = {}
 
-    if options.user_agent:
-        configure('user_agent', options.user_agent)
+    settings_dict = settings.as_dict()
 
-    if options.poke_theme:
-        theme_data = await options.poke_theme(options.url)
-        print(theme_data)
+    for p_lookup_name, plugin in finger_registry:
+        import ipdb;ipdb.set_trace()
+        plugin_result = await plugin.run(cli_options.url, **settings_dict)
+        poke_result[p_lookup_name] = plugin_result
+
+    for p_lookup_name, plugin in finger_registry:
+        plugin.render(poke_result[p_lookup_name], **settings_dict)
 
 
 if __name__ == '__main__':
