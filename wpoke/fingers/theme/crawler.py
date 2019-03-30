@@ -1,19 +1,17 @@
-import aiohttp
 import asyncio
 import itertools
 import re
-
 from typing import List, Optional, Set, Iterator, Union
 
+import aiohttp
 from aiohttp import ClientSession
 from lxml import etree
 
 from wpoke import exceptions as general_exceptions
-from wpoke.validators.url import validate_url
 from wpoke.conf import settings
-
-from .models import WPThemeMetadata
+from wpoke.validators.url import validate_url
 from .exceptions import *
+from .models import WPThemeMetadata
 
 
 def raise_on_failure(status_code: int, has_body: bool) -> None:
@@ -164,7 +162,8 @@ async def get_screenshot(session: ClientSession, url: str) -> Optional[str]:
     return None
 
 
-async def add_extra_features(session, url, model):
+async def add_extra_features(session, url: str,
+                             model: WPThemeMetadata) -> WPThemeMetadata:
     # Screenshot feature
     screenshot = await get_screenshot(session, url)
     if screenshot:
@@ -172,7 +171,7 @@ async def add_extra_features(session, url, model):
     return model
 
 
-async def get_theme(url: str) -> List[WPThemeMetadata]:
+async def get_theme(url: str, **options) -> List[WPThemeMetadata]:
     try:
         async with ClientSession() as session:
             html_content = await fetch_html_body(session, url)
@@ -208,13 +207,13 @@ async def get_theme(url: str) -> List[WPThemeMetadata]:
                 raise BundledThemeException
 
             return theme_models
-    except aiohttp.client_exceptions.TooManyRedirects:
+    except aiohttp.client.TooManyRedirects:
         raise general_exceptions.NastyTargetException
-    except aiohttp.client_exceptions.ClientConnectionError:
+    except aiohttp.client.ClientConnectionError:
         raise general_exceptions.TargetInternalServerError
     except aiohttp.ServerTimeoutError:
         raise general_exceptions.TargetTimeout
-    except aiohttp.client_exceptions.ClientError:
+    except aiohttp.client.ClientError:
         # General unexpected error
         raise general_exceptions.TargetInternalServerError
     except asyncio.TimeoutError as e:

@@ -1,8 +1,7 @@
-import serpy
-
 from copy import copy
-
 from typing import ValuesView
+
+import serpy
 
 
 class WPThemeMetadataSerializer(serpy.Serializer):

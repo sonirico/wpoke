@@ -1,4 +1,3 @@
-
 class TargetException(Exception):
     pass
 
@@ -29,4 +28,3 @@ class ValidationError(Exception):
 
         self.message = message
         self.code = code
-

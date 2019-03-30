@@ -3,7 +3,6 @@ import re
 import ipaddress
 
 from wpoke.exceptions import ValidationError
-
 from wpoke.validators import EMPTY_VALUES
 
 
@@ -21,12 +20,12 @@ class URLValidator(object):
     # Max length for domain name labels is 63 characters per RFC 1034 sec. 3.1
     domain_re = r'(?:\.(?!-)[a-z' + ul + r'0-9-]{1,63}(?<!-))*'
     tld_re = (
-        r'\.'                                # dot
-        r'(?!-)'                             # can't start with a dash
-        r'(?:[a-z' + ul + '-]{2,63}'         # domain label
-        r'|xn--[a-z0-9]{1,59})'              # or punycode label
-        r'(?<!-)'                            # can't end with a dash
-        r'\.?'                               # may have a trailing dot
+            r'\.'  # dot
+            r'(?!-)'  # can't start with a dash
+            r'(?:[a-z' + ul + '-]{2,63}'  # domain label
+                              r'|xn--[a-z0-9]{1,59})'  # or punycode label
+                              r'(?<!-)'  # can't end with a dash
+                              r'\.?'  # may have a trailing dot
     )
 
     host_re = '(' + hostname_re + domain_re + tld_re + ')'
@@ -34,12 +33,12 @@ class URLValidator(object):
     # host_re = '(' + hostname_re + domain_re + tld_re + '|localhost)'
 
     regex = (
-        r'^(?P<scheme>https?)://'  # scheme is validated separately
-        r'(?:\S+(?::\S*)?@)?'  # user:pass authentication
-        r'(?P<host>' + ipv4_re + '|' + ipv6_re + '|' + host_re + ')'
-        r'(?::\d{2,5})?'  # port
-        r'(?:[/?#][^\s]*)?'  # resource path
-        r'\Z'
+            r'^(?P<scheme>https?)://'  # scheme is validated separately
+            r'(?:\S+(?::\S*)?@)?'  # user:pass authentication
+            r'(?P<host>' + ipv4_re + '|' + ipv6_re + '|' + host_re + ')'
+                                                                     r'(?::\d{2,5})?'  # port
+                                                                     r'(?:[/?#][^\s]*)?'  # resource path
+                                                                     r'\Z'
     )
 
     compiled_regex = re.compile(regex, re.IGNORECASE)

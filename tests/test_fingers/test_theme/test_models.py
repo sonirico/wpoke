@@ -1,6 +1,6 @@
 import unittest
 
-from wpoke.crawlers.theme.models import WPThemeMetadata
+from wpoke.fingers.theme import WPThemeMetadata
 
 
 class TestWPThemeMetadata(unittest.TestCase):

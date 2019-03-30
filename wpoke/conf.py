@@ -10,6 +10,10 @@ DEFAULT_CONFIG = {
 
 <<<<<<< HEAD
     @property
+    def user_agent(self):
+        return getattr(self, 'useragent', defaults.USER_AGENT)
+
+    @property
     def http_headers(self):
         return {
             'User-Agent': getattr(self, 'user_agent', defaults.USER_AGENT)
@@ -37,6 +41,7 @@ class SettingAttr(object):
 
 >>>>>>> e9ee5a7... patch
 
+<<<<<<< HEAD
 class Settings(dict):
     def __getattr__(self, item):
         if item in self:
@@ -45,6 +50,16 @@ class Settings(dict):
         if u_item in self:
             return self.__getitem__(u_item)
         raise AttributeError(item)
+=======
+    def as_dict(self):
+        return {
+            'http_headers': self.http_headers,
+            'request_config': self.request_config,
+            'timeout': self.time_out,
+            'user_agent': self.user_agent,
+        }
+
+>>>>>>> b44d42b... Prototype plugin minimal system
 
 
 settings = Settings(DEFAULT_CONFIG)

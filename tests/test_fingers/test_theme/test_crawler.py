@@ -3,12 +3,12 @@ import unittest
 
 from asynctest import CoroutineMock
 
-from wpoke.crawlers.theme import exceptions as theme_exceptions
-from wpoke.crawlers.theme.crawler import extract_info_from_css
-from wpoke.crawlers.theme.crawler import extract_theme_path_candidates
-from wpoke.crawlers.theme.crawler import get_screenshot
-from wpoke.crawlers.theme.crawler import truncate_theme_url
-from wpoke.crawlers.theme.crawler import remove_duplicated_theme_urls
+from wpoke.fingers.theme import exceptions as theme_exceptions
+from wpoke.fingers.theme import extract_info_from_css
+from wpoke.fingers.theme import extract_theme_path_candidates
+from wpoke.fingers.theme import get_screenshot
+from wpoke.fingers.theme import truncate_theme_url
+from wpoke.fingers.theme import remove_duplicated_theme_urls
 
 
 @pytest.mark.asyncio
