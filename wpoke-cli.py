@@ -37,8 +37,6 @@ def get_cli_options():
         if required is not None:
             pkwargs['required'] = required
 
-        import ipdb;ipdb.set_trace()
-
         parser.add_argument(*pargs, **pkwargs)
 
     return parser.parse_args()
@@ -48,13 +46,10 @@ def load_settings(cli_options):
     # User-Agent http header
     if cli_options.useragent:
         configure('useragent', cli_options.useragent)
-    # Target timeout
-    # if cli_options.timeout
-    # configure('timeout', cli_options.timeout)
 
 
 def load_plugins():
-    finger_registry.autodiscover_fingers(mods=['theme'])
+    finger_registry.autodiscover_fingers(mods=settings.installed_fingers)
 
 
 def load_plugin_options():
@@ -71,7 +66,6 @@ async def main():
     settings_dict = settings.as_dict()
 
     for p_lookup_name, plugin in finger_registry:
-        import ipdb;ipdb.set_trace()
         plugin_result = await plugin.run(cli_options.url, **settings_dict)
         poke_result[p_lookup_name] = plugin_result
 

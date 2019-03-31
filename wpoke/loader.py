@@ -6,7 +6,7 @@ from importlib import import_module
 logger = logging.getLogger(__name__)
 
 
-class FingerLoader:
+class BaseLoader:
     def load(self, mods=None):
         if not isinstance(mods, Sequence):
             raise ValueError('Iterables only')
@@ -15,8 +15,8 @@ class FingerLoader:
             import_module(f'.{mod_name}', package='wpoke.fingers')
 
 
-class PluginRegistry:
-    finger_loader_cls = FingerLoader
+class FingerRegistry:
+    finger_loader_cls = BaseLoader
 
     def __init__(self, finger_loader_cls=None):
         self._registry = {}
@@ -40,12 +40,11 @@ class PluginRegistry:
             lookup_key = getattr(finger_cls.Meta, 'name', name or cls_name)
         except AttributeError:
             logger.error(f'unable to get identifier for finger {cls_name}')
-            return
+        else:
+            finger_instance = finger_cls()
+            self._registry[lookup_key] = finger_instance
 
-        finger_instance = finger_cls()
-        self._registry[lookup_key] = finger_instance
-
-        return lookup_key, finger_instance
+            return lookup_key, finger_instance
 
 
-finger_registry = PluginRegistry()
+finger_registry = FingerRegistry()
