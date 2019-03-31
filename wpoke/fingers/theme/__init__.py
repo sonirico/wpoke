@@ -1,8 +1,10 @@
 import json
+import sys
 
 from wpoke import exceptions as generic_exceptions
 from wpoke.finger import BaseFinger
 from wpoke.loader import finger_registry
+
 from . import exceptions as theme_exceptions
 from .crawler import get_theme
 
@@ -28,5 +30,5 @@ class ThemeFinger(BaseFinger):
         else:
             return [theme_model.serialize() for theme_model in result]
 
-    def render(self, result, fmt=None, **options):
-        print(json.dumps(result, indent=4))
+    def render(self, result, fmt=None, file=sys.stdout, **options):
+        print(json.dumps(result, indent=4), file=file)
