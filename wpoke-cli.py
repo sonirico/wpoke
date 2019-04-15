@@ -3,16 +3,23 @@ import asyncio
 import sys
 import uvloop
 
-from wpoke.conf import configure, settings
-from wpoke.loader import finger_registry
+from wpoke.conf import Settings, DEFAULT_CONFIG
+from wpoke.loader import FingerRegistry
 
 
-def get_cli_options():
+def extract_cli_options(finger_registry):
+    """
+    Based on the cli options configured in every registry, load the
+    pertinent settings from them
+    """
     parser = argparse.ArgumentParser(
         description='WordPress information gathering tool')
     parser.add_argument('url', help='Target WordPress site. Can be any URL')
     parser.add_argument('-u', '--user-agent', type=str, dest='useragent',
                         help='User agent to use',
+                        required=False)
+    parser.add_argument('-tt', '--timeout', type=str, dest='timeout',
+                        help='Global default timeout for all requests',
                         required=False)
     parser.add_argument('-f', '--format', type=str, dest='render_format',
                         help='Output format. {json|cmd}',
@@ -42,35 +49,33 @@ def get_cli_options():
     return parser.parse_args()
 
 
-def load_settings(cli_options):
+def load_settings(cli_options, settings):
+    """
+    Set global configuration based on selected options defined in the CLI
+    """
     # User-Agent http header
     if cli_options.useragent:
-        configure('useragent', cli_options.useragent)
-
-
-def load_plugins():
-    finger_registry.autodiscover_fingers(mods=settings.installed_fingers)
-
-
-def load_plugin_options():
-    pass
+        settings.USER_AGENT = cli_options.useragent
+    if cli_options.timeout:
+        settings.TIMEOUT = cli_options.timeout
 
 
 async def main():
-    load_plugins()
-    load_plugin_options()
-    cli_options = get_cli_options()
-    load_settings(cli_options)
+    registry = FingerRegistry()
+    settings = Settings(DEFAULT_CONFIG)
+    registry.autodiscover_fingers(mods=settings.installed_fingers)
+    cli_options = extract_cli_options(registry)
+    load_settings(cli_options, settings)
     poke_result = {}
 
-    settings_dict = settings.as_dict()
-
-    for p_lookup_name, plugin in finger_registry:
-        plugin_result = await plugin.run(cli_options.url, **settings_dict)
+    # Perform remote lookups and obtain data
+    for p_lookup_name, plugin in registry:
+        plugin_result = await plugin.run(cli_options.url, **settings)
         poke_result[p_lookup_name] = plugin_result
 
-    for p_lookup_name, plugin in finger_registry:
-        plugin.render(poke_result[p_lookup_name], **settings_dict)
+    # Iterate over fingers again so as to render data
+    for p_lookup_name, plugin in registry:
+        plugin.render(poke_result[p_lookup_name], **settings)
 
 
 if __name__ == '__main__':

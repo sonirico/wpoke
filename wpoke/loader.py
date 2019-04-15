@@ -8,11 +8,13 @@ logger = logging.getLogger(__name__)
 
 class BaseLoader:
     def load(self, mods=None):
-        if not isinstance(mods, Sequence):
+        if mods and not isinstance(mods, Sequence):
             raise ValueError('Iterables only')
-
+        loaded_mods = []
         for mod_name in mods:
-            import_module(f'.{mod_name}', package='wpoke.fingers')
+            mod = import_module(f'.{mod_name}', package='wpoke.fingers')
+            loaded_mods.append(mod)
+        return loaded_mods
 
 
 class FingerRegistry:
@@ -28,7 +30,12 @@ class FingerRegistry:
 
     def autodiscover_fingers(self, mods=None):
         loader = self.finger_loader_cls()
-        loader.load(mods=mods)
+        loaded_mods = loader.load(mods=mods)
+        for mod in loaded_mods:
+            cls_candidate = getattr(mod, 'finger_cls', None)
+            if not cls_candidate:
+                continue
+            self.register(mod.finger_cls)
 
     @property
     def registry(self):
@@ -45,6 +52,3 @@ class FingerRegistry:
             self._registry[lookup_key] = finger_instance
 
             return lookup_key, finger_instance
-
-
-finger_registry = FingerRegistry()
