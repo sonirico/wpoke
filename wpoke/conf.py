@@ -1,5 +1,4 @@
-from typing import Any, Callable, Optional
-
+from typing import Any, Callable, Dict, Optional
 
 DEFAULT_CONFIG = {
     'TIMEOUT': 5,
@@ -8,23 +7,11 @@ DEFAULT_CONFIG = {
     'INSTALLED_FINGERS': ("theme",)
 }
 
-<<<<<<< HEAD
-    @property
-    def user_agent(self):
-        return getattr(self, 'useragent', defaults.USER_AGENT)
-
-    @property
-    def http_headers(self):
-        return {
-            'User-Agent': getattr(self, 'user_agent', defaults.USER_AGENT)
-        }
-=======
 
 class SettingAttr(object):
     def __init__(self, key: str, processor: Optional[Callable] = None):
         self.name = key
         self.processor = processor
->>>>>>> e9ee5a7... patch
 
     def __get__(self, instance, owner) -> Any:
         if instance is None:
@@ -34,14 +21,10 @@ class SettingAttr(object):
             return self.processor(value)
         return value
 
-<<<<<<< HEAD
-=======
     def __set__(self, instance, value) -> None:
         instance[self.name] = value
 
->>>>>>> e9ee5a7... patch
 
-<<<<<<< HEAD
 class Settings(dict):
     def __getattr__(self, item):
         if item in self:
@@ -49,18 +32,34 @@ class Settings(dict):
         u_item = item.upper()
         if u_item in self:
             return self.__getitem__(u_item)
+        l_item = item.lower()
+        if u_item in self:
+            return self.__getitem__(l_item)
         raise AttributeError(item)
-=======
-    def as_dict(self):
-        return {
-            'http_headers': self.http_headers,
-            'request_config': self.request_config,
-            'timeout': self.time_out,
-            'user_agent': self.user_agent,
-        }
 
->>>>>>> b44d42b... Prototype plugin minimal system
+    # def as_dict(self):
+    #     return {
+    #         'http_headers': self.http_headers,
+    #         'request_config': self.request_config,
+    #         'timeout': self.time_out,
+    #         'user_agent': self.user_agent,
+    #     }
+
+
+class HTTPSettings(Settings):
+    """ Highly specialised on http whreabouts """
+
+    def __init__(self, base_config: Dict) -> None:
+        super().__init__(base_config)
+
+    @property
+    def request_config(self):
+        return {
+            'timeout': self.timeout,
+            'headers': {
+                'User-Agent': self.user_agent
+            }
+        }
 
 
 settings = Settings(DEFAULT_CONFIG)
-

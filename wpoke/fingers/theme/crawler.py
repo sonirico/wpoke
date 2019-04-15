@@ -8,7 +8,7 @@ from aiohttp import ClientSession
 from lxml import etree
 
 from wpoke import exceptions as general_exceptions
-from wpoke.conf import settings
+from wpoke.conf import HTTPSettings
 from wpoke.validators.url import validate_url
 from .exceptions import *
 from .models import WPThemeMetadata
@@ -24,14 +24,14 @@ def raise_on_failure(status_code: int, has_body: bool) -> None:
         raise general_exceptions.TargetInternalServerError
 
 
-async def fetch_html_body(session: ClientSession, url: str):
+async def fetch_html_body(session: ClientSession, url: str, **request_config):
     """ Encapsulates request/response lifecycle management
 
     :param session:
     :param url:
     :return:
     """
-    async with session.get(url, **settings.request_config) as response:
+    async with session.get(url, **request_config) as response:
         body = await response.text()
 
         raise_on_failure(response.status, bool(body))
@@ -40,7 +40,7 @@ async def fetch_html_body(session: ClientSession, url: str):
 
 
 async def fetch_style_css(session: ClientSession, url: str, **params):
-    async with session.get(url, **settings.request_config) as response:
+    async with session.get(url, **params) as response:
         body = await response.text()
         body_length = len(body) if body else 0
 
@@ -151,30 +151,34 @@ def extract_theme_path_by_global_regex(url: str,
             if validate_url.is_same_origin(match, url)]
 
 
-async def get_screenshot(session: ClientSession, url: str) -> Optional[str]:
+async def get_screenshot(session: ClientSession, url: str,
+                         **http_settings) -> Optional[str]:
     for img_candidate_extension in ['jpeg', 'png', 'jpg']:
         screenshot_url = f'{url}screenshot.{img_candidate_extension}'
 
         async with session.head(screenshot_url,
-                                **settings.request_config) as response:
+                                **http_settings) as response:
             if 200 <= response.status <= 299:
                 return screenshot_url
     return None
 
 
 async def add_extra_features(session, url: str,
-                             model: WPThemeMetadata) -> WPThemeMetadata:
+                             model: WPThemeMetadata,
+                             **http_settings) -> WPThemeMetadata:
     # Screenshot feature
-    screenshot = await get_screenshot(session, url)
+    screenshot = await get_screenshot(session, url, **http_settings)
     if screenshot:
         model.set_featured_image(screenshot)
     return model
 
 
-async def get_theme(url: str, **options) -> List[WPThemeMetadata]:
+async def get_theme(url: str, options: HTTPSettings) -> List[WPThemeMetadata]:
+    http_settings = options.request_config
     try:
         async with ClientSession() as session:
-            html_content = await fetch_html_body(session, url)
+            html_content = await fetch_html_body(session, url,
+                                                 **http_settings)
 
             if not html_content:
                 raise general_exceptions.MalformedBodyException
@@ -190,7 +194,7 @@ async def get_theme(url: str, **options) -> List[WPThemeMetadata]:
                 style_css_path = candidate_url + 'style.css'
                 css_content = await fetch_style_css(session,
                                                     style_css_path,
-                                                    **settings.request_config)
+                                                    **http_settings)
 
                 try:
                     theme_model = extract_info_from_css(css_content)
@@ -199,7 +203,8 @@ async def get_theme(url: str, **options) -> List[WPThemeMetadata]:
                 else:
                     theme_model = await add_extra_features(session,
                                                            candidate_url,
-                                                           theme_model)
+                                                           theme_model,
+                                                           **http_settings)
                     theme_models.append(theme_model)
 
             if len(theme_models) < 1:

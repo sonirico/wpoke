@@ -1,15 +1,14 @@
 import json
 import sys
+from typing import Any
 
 from wpoke import exceptions as generic_exceptions
+from wpoke.conf import HTTPSettings
 from wpoke.finger import BaseFinger
-from wpoke.loader import finger_registry
-
 from . import exceptions as theme_exceptions
 from .crawler import get_theme
 
 
-@finger_registry.register
 class ThemeFinger(BaseFinger):
     class Meta:
         name = 'theme'
@@ -20,9 +19,10 @@ class ThemeFinger(BaseFinger):
         short_flag = '-t'
         long_flag = '--theme'
 
-    async def run(self, target, timeout=None, **options):
+    async def run(self, target, timeout=None, **options) -> Any:
+        http_settings = HTTPSettings(options)
         try:
-            result = await get_theme(target, **options)
+            result = await get_theme(target, http_settings)
         except theme_exceptions.BundledThemeException as e:
             print(e.message)
         except generic_exceptions.TargetTimeout:
@@ -30,5 +30,8 @@ class ThemeFinger(BaseFinger):
         else:
             return [theme_model.serialize() for theme_model in result]
 
-    def render(self, result, fmt=None, file=sys.stdout, **options):
+    def render(self, result, fmt=None, file=sys.stdout, **options) -> None:
         print(json.dumps(result, indent=4), file=file)
+
+
+finger_cls = ThemeFinger
