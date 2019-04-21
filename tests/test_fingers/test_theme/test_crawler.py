@@ -1,14 +1,14 @@
-import pytest
 import unittest
 
+import pytest
 from asynctest import CoroutineMock
 
 from wpoke.fingers.theme import exceptions as theme_exceptions
 from wpoke.fingers.theme.crawler import extract_info_from_css
 from wpoke.fingers.theme.crawler import extract_theme_path_candidates
 from wpoke.fingers.theme.crawler import get_screenshot
-from wpoke.fingers.theme.crawler import truncate_theme_url
 from wpoke.fingers.theme.crawler import remove_duplicated_theme_urls
+from wpoke.fingers.theme.crawler import truncate_theme_url
 
 
 @pytest.mark.asyncio
@@ -37,16 +37,16 @@ def test_truncate_url(actual, expected):
 
 @pytest.mark.parametrize("urls, expected", [
     (
-        [
-            'http://wpoke.app/wp-content/themes/pepe/jquery.js',
-            'http://wpoke.app/wp-content/themes/paco/jquery.js',
-            'http://wpoke.app/wp-content/themes/paco/plugins/ui/widget.js',
-            'http://wpoke.app/wp-content/themes/pepe/style.css'
-        ],
-        {
-            'http://wpoke.app/wp-content/themes/pepe/',
-            'http://wpoke.app/wp-content/themes/paco/'
-        }
+            [
+                'http://wpoke.app/wp-content/themes/pepe/jquery.js',
+                'http://wpoke.app/wp-content/themes/paco/jquery.js',
+                'http://wpoke.app/wp-content/themes/paco/plugins/ui/widget.js',
+                'http://wpoke.app/wp-content/themes/pepe/style.css'
+            ],
+            {
+                'http://wpoke.app/wp-content/themes/pepe/',
+                'http://wpoke.app/wp-content/themes/paco/'
+            }
     )
 ])
 def test_remove_duplicated_urls(urls, expected):
@@ -81,7 +81,8 @@ class TestThemeCrawlerExtractInfoFromCSS(unittest.TestCase):
         assert 'baskerville' == wp_metadata.text_domain
 
     def test_empty_value_does_not_fallback_to_next(self):
-        mocked_css = self.fixture_content('crawlers/theme/css/empty_next_fallback.css')
+        mocked_css = self.fixture_content(
+            'crawlers/theme/css/empty_next_fallback.css')
 
         wp_metadata = extract_info_from_css(mocked_css)
 
@@ -104,7 +105,8 @@ class TestThemeCrawlerExtractCandidateURLs(object):
             assert expected_url in actual
 
     def test_extract_candidate_urls_have_not_duplicates(self):
-        mocked_html = self.fixture_content('crawlers/theme/html/duplicates.html')
+        mocked_html = self.fixture_content(
+            'crawlers/theme/html/duplicates.html')
         target_url = 'https://duplicates.wp.com/'
 
         actual = extract_theme_path_candidates(target_url, mocked_html)
@@ -145,7 +147,8 @@ class TestThemeCrawlerExtractCandidateURLs(object):
         assert expected == actual
 
     def test_extracted_urls_same_domain(self):
-        mocked_html = self.fixture_content('crawlers/theme/html/urls_third_parties.html')
+        mocked_html = self.fixture_content(
+            'crawlers/theme/html/urls_third_parties.html')
         target_url = 'https://wp.com/whatever/goes/here/'
 
         actual = extract_theme_path_candidates(target_url, mocked_html)
@@ -157,7 +160,8 @@ class TestThemeCrawlerExtractCandidateURLs(object):
             assert expected_token in actual
 
     def test_extract_candidate_urls_child_theme_installed(self):
-        mocked_html = self.fixture_content('crawlers/theme/html/child_theme.html')
+        mocked_html = self.fixture_content(
+            'crawlers/theme/html/child_theme.html')
         target_url = 'https://wp.com'
         actual = extract_theme_path_candidates(target_url, mocked_html)
         expected = [
@@ -169,7 +173,8 @@ class TestThemeCrawlerExtractCandidateURLs(object):
             assert expected_uri in actual
 
     def test_extract_candidate_urls_from_global_cross_search(self):
-        mocked_html = self.fixture_content('crawlers/theme/html/sites/sozpic.com.html')
+        mocked_html = self.fixture_content(
+            'crawlers/theme/html/sites/sozpic.com.html')
         target_url = 'https://www.sozpic.com'
         actual = extract_theme_path_candidates(target_url, mocked_html)
         expected = [

@@ -45,4 +45,3 @@ class TestURLValidator(unittest.TestCase):
 
         with self.assertRaises(ValidationError):
             validator('https://172.16.254.233')
-

@@ -1,10 +1,21 @@
+from enum import Enum
 from typing import Any, Callable, Dict, Optional
+
+
+class RenderFormats(Enum):
+    JSON = 'json'
+    CLI = 'cli'
+
+
+RENDER_FORMATS = tuple(format_.value for format_ in RenderFormats)
 
 DEFAULT_CONFIG = {
     'TIMEOUT': 5,
     'USER_AGENT': "wpoke/0.1 (+you have been poked! Find out more at "
                   "https://github.com/sonirico/wpoke)",
-    'INSTALLED_FINGERS': ("theme",)
+    'INSTALLED_FINGERS': ("theme",),
+    'FORMAT': RenderFormats.JSON.value,
+    'ALLOWED_FORMATS': RENDER_FORMATS
 }
 
 
@@ -25,7 +36,14 @@ class SettingAttr(object):
         instance[self.name] = value
 
 
+class InvalidCliConfigurationException(Exception):
+    pass
+
+
 class Settings(dict):
+    def __setattr__(self, key, value):
+        self.__setitem__(key, value)
+
     def __getattr__(self, item):
         if item in self:
             return self.__getitem__(item)
@@ -46,6 +64,7 @@ class HTTPSettings(Settings):
 
     @property
     def request_config(self):
+        """ Return settings as expected by aiohttp """
         return {
             'timeout': self.timeout,
             'headers': {

@@ -1,9 +1,8 @@
+import asyncio
 import os
 
 import pytest
-import asyncio
 import uvloop
-
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
@@ -18,6 +17,7 @@ def fixture_file_content(request):
         with open(os.path.join(FIXTURES_ROOT, file_name)) as fd:
             content = fd.read()
         return content
+
     request.cls.fixture_content = inner
 
 
@@ -27,4 +27,5 @@ def read_fixture():
         with open(os.path.join(FIXTURES_ROOT, file_name)) as fd:
             content = fd.read()
         return content
+
     return inner

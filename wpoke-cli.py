@@ -1,11 +1,11 @@
 import argparse
 import asyncio
 import sys
-import uvloop
 
+import uvloop
 from aiohttp import ClientSession
 
-from wpoke.conf import Settings, DEFAULT_CONFIG
+from wpoke.conf import InvalidCliConfigurationException, Settings, DEFAULT_CONFIG
 from wpoke.loader import FingerRegistry
 
 
@@ -24,7 +24,7 @@ def extract_cli_options(finger_registry):
                         help='Global default timeout for all requests',
                         required=False)
     parser.add_argument('-f', '--format', type=str, dest='render_format',
-                        help='Output format. {json|cmd}',
+                        help='Output format. {json|cli}',
                         required=False)
 
     for lookup_key, finger in finger_registry:
@@ -48,7 +48,7 @@ def extract_cli_options(finger_registry):
 
         parser.add_argument(*pargs, **pkwargs)
 
-    return parser.parse_args()
+    return parser, parser.parse_args()
 
 
 def load_settings(cli_options, settings):
@@ -58,16 +58,30 @@ def load_settings(cli_options, settings):
     # User-Agent http header
     if cli_options.useragent:
         settings.USER_AGENT = cli_options.useragent
+    # Global timeout
     if cli_options.timeout:
         settings.TIMEOUT = cli_options.timeout
+    # Output format
+    if cli_options.render_format:
+        if cli_options.render_format not in settings.ALLOWED_FORMATS:
+            message = f'unknown format: {cli_options.render_format}'
+            raise InvalidCliConfigurationException(message)
+        settings.FORMAT = cli_options.render_format
 
 
 async def main():
     registry = FingerRegistry()
     settings = Settings(DEFAULT_CONFIG)
     registry.autodiscover_fingers(mods=settings.installed_fingers)
-    cli_options = extract_cli_options(registry)
-    load_settings(cli_options, settings)
+    cli_parser, cli_options = extract_cli_options(registry)
+
+    try:
+        load_settings(cli_options, settings)
+    except InvalidCliConfigurationException as e:
+        print(str(e))
+        cli_parser.print_help()
+        sys.exit(2)
+
     poke_result = {}
 
     # TODO: Abstract away plugin orchestration as running them concurrently
@@ -80,13 +94,9 @@ async def main():
                                              **settings)
             poke_result[p_lookup_name] = plugin_result
 
-        # Iterate over fingers again so as to render data
-        for p_lookup_name, plugin in registry:
-            plugin.render(poke_result[p_lookup_name], **settings)
-
-
-async def a():
-    pass
+    # Iterate over fingers again so as to render data
+    for p_lookup_name, plugin in registry:
+        plugin.render(poke_result[p_lookup_name], **settings)
 
 
 if __name__ == '__main__':

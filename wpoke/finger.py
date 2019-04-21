@@ -1,9 +1,8 @@
 from abc import ABCMeta
 from abc import abstractmethod
+from typing import AnyStr
 
 from aiohttp import ClientSession
-
-from typing import AnyStr
 
 
 class BaseFinger(metaclass=ABCMeta):
