@@ -2,7 +2,7 @@ from typing import Any, Callable, Dict, Optional
 
 DEFAULT_CONFIG = {
     'TIMEOUT': 5,
-    'USER_AGENT': "wpoke/0.1 (+you have been poked! Find out more in "
+    'USER_AGENT': "wpoke/0.1 (+you have been poked! Find out more at "
                   "https://github.com/sonirico/wpoke)",
     'INSTALLED_FINGERS': ("theme",)
 }
@@ -36,14 +36,6 @@ class Settings(dict):
         if u_item in self:
             return self.__getitem__(l_item)
         raise AttributeError(item)
-
-    # def as_dict(self):
-    #     return {
-    #         'http_headers': self.http_headers,
-    #         'request_config': self.request_config,
-    #         'timeout': self.time_out,
-    #         'user_agent': self.user_agent,
-    #     }
 
 
 class HTTPSettings(Settings):

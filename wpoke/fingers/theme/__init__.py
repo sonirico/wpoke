@@ -1,6 +1,8 @@
 import json
 import sys
-from typing import Any
+from typing import Any, AnyStr
+
+from aiohttp import ClientSession
 
 from wpoke import exceptions as generic_exceptions
 from wpoke.conf import HTTPSettings
@@ -19,10 +21,11 @@ class ThemeFinger(BaseFinger):
         short_flag = '-t'
         long_flag = '--theme'
 
-    async def run(self, target, timeout=None, **options) -> Any:
+    async def run(self, target: AnyStr, http_session: ClientSession,
+                  timeout=None, **options) -> Any:
         http_settings = HTTPSettings(options)
         try:
-            result = await get_theme(target, http_settings)
+            result = await get_theme(target, http_settings, http_session)
         except theme_exceptions.BundledThemeException as e:
             print(e.message)
         except generic_exceptions.TargetTimeout:

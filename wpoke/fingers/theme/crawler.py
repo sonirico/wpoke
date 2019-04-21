@@ -174,45 +174,45 @@ async def add_extra_features(session, url: str,
     return model
 
 
-async def get_theme(url: str, options: HTTPSettings) -> List[WPThemeMetadata]:
+async def get_theme(url: str, options: HTTPSettings,
+                    session: ClientSession) -> List[WPThemeMetadata]:
     http_settings = options.request_config
     try:
-        async with ClientSession() as session:
-            html_content = await fetch_html_body(session, url,
-                                                 **http_settings)
+        html_content = await fetch_html_body(session, url,
+                                             **http_settings)
 
-            if not html_content:
-                raise general_exceptions.MalformedBodyException
+        if not html_content:
+            raise general_exceptions.MalformedBodyException
 
-            candidates = extract_theme_path_candidates(url, html_content)
+        candidates = extract_theme_path_candidates(url, html_content)
 
-            if not candidates:
-                raise ThemePathMissingException
+        if not candidates:
+            raise ThemePathMissingException
 
-            theme_models = []
+        theme_models = []
 
-            for candidate_url in candidates:
-                style_css_path = candidate_url + 'style.css'
-                css_content = await fetch_style_css(session,
-                                                    style_css_path,
-                                                    **http_settings)
+        for candidate_url in candidates:
+            style_css_path = candidate_url + 'style.css'
+            css_content = await fetch_style_css(session,
+                                                style_css_path,
+                                                **http_settings)
 
-                try:
-                    theme_model = extract_info_from_css(css_content)
-                except BundledThemeException:
-                    continue
-                else:
-                    theme_model = await add_extra_features(session,
-                                                           candidate_url,
-                                                           theme_model,
-                                                           **http_settings)
-                    theme_models.append(theme_model)
+            try:
+                theme_model = extract_info_from_css(css_content)
+            except BundledThemeException:
+                continue
+            else:
+                theme_model = await add_extra_features(session,
+                                                       candidate_url,
+                                                       theme_model,
+                                                       **http_settings)
+                theme_models.append(theme_model)
 
-            if len(theme_models) < 1:
-                # At least one css model must be found.
-                raise BundledThemeException
+        if len(theme_models) < 1:
+            # At least one css model must be found.
+            raise BundledThemeException
 
-            return theme_models
+        return theme_models
     except aiohttp.client.TooManyRedirects:
         raise general_exceptions.NastyTargetException
     except aiohttp.client.ClientConnectionError:

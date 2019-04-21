@@ -3,6 +3,8 @@ import asyncio
 import sys
 import uvloop
 
+from aiohttp import ClientSession
+
 from wpoke.conf import Settings, DEFAULT_CONFIG
 from wpoke.loader import FingerRegistry
 
@@ -68,14 +70,23 @@ async def main():
     load_settings(cli_options, settings)
     poke_result = {}
 
-    # Perform remote lookups and obtain data
-    for p_lookup_name, plugin in registry:
-        plugin_result = await plugin.run(cli_options.url, **settings)
-        poke_result[p_lookup_name] = plugin_result
+    # TODO: Abstract away plugin orchestration as running them concurrently
+    # may server alarms go off
+    async with ClientSession() as session:
+        # Perform remote lookups and obtain data
+        for p_lookup_name, plugin in registry:
+            plugin_result = await plugin.run(cli_options.url,
+                                             session,
+                                             **settings)
+            poke_result[p_lookup_name] = plugin_result
 
-    # Iterate over fingers again so as to render data
-    for p_lookup_name, plugin in registry:
-        plugin.render(poke_result[p_lookup_name], **settings)
+        # Iterate over fingers again so as to render data
+        for p_lookup_name, plugin in registry:
+            plugin.render(poke_result[p_lookup_name], **settings)
+
+
+async def a():
+    pass
 
 
 if __name__ == '__main__':
