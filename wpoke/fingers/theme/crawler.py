@@ -11,7 +11,7 @@ from wpoke import exceptions as general_exceptions
 from wpoke.conf import HTTPSettings
 from wpoke.validators.url import validate_url
 from .exceptions import *
-from .models import WPThemeMetadata
+from .models import WPThemeMetadata, WPThemeModelDisplay
 
 
 def raise_on_failure(status_code: int, has_body: bool) -> None:
@@ -60,7 +60,7 @@ def extract_info_from_css(css_content: str) -> WPThemeMetadata:
     wp_meta = WPThemeMetadata()
     css_content = css_content.replace('\r', '\n')
 
-    for k, v in WPThemeMetadata.get_metadata_schema().items():
+    for k, v in WPThemeModelDisplay():
         regex_ = f"^[ \t/*#@]*{v}:(?P<meta_value>.*)$"  # https://github.com/WordPress/WordPress/blob/aab929b8d619bde14495a97cdc1eb7bdf1f1d487/wp-includes/functions.php#L5182
         regex = re.compile(regex_, re.IGNORECASE | re.M)
         match = re.search(regex, css_content)

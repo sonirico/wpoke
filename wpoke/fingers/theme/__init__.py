@@ -1,14 +1,15 @@
 import json
 import sys
-from typing import Any, AnyStr
+from typing import AnyStr, Dict, List
 
 from aiohttp import ClientSession
 
 from wpoke import exceptions as generic_exceptions
-from wpoke.conf import HTTPSettings, Settings, RenderFormats
+from wpoke.conf import settings, RenderFormats
 from wpoke.finger import BaseFinger
 from . import exceptions as theme_exceptions
 from .crawler import get_theme
+from wpoke.fingers.theme.serializers import WPThemeMetadataSerializer
 
 
 class ThemeFinger(BaseFinger):
@@ -22,17 +23,17 @@ class ThemeFinger(BaseFinger):
         long_flag = '--theme'
 
     async def run(self, target: AnyStr, http_session: ClientSession,
-                  **options) -> Any:
-        http_settings = HTTPSettings(options)
+                  **options) -> List[Dict]:
         try:
-            result = await get_theme(target, http_settings, http_session)
+            themes = await get_theme(target, http_session)
         except theme_exceptions.BundledThemeException as e:
             print(e.message)
         except generic_exceptions.TargetTimeout:
-            timeout = http_settings.timeout
+            timeout = settings.timeout
             print(f'Target timeout. Try to set a value higher than {timeout}')
         else:
-            return [theme_model.serialize() for theme_model in result]
+            serializer = WPThemeMetadataSerializer(themes, many=True)
+            return serializer.data
 
     def render(self, result, file=sys.stdout, **options: Settings) -> None:
         fmt = options.FORMAT
