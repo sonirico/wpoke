@@ -1,6 +1,0 @@
-[default]
-timeout = 5
-user_agent = "wpoke/0.1 (+you have been poked! Find out more in https://github.com/sonirico/wpoke)"
-installed_fingers = [
-    "theme"
-]
