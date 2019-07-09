@@ -7,7 +7,7 @@ class WPThemeMetadataSerializer(serpy.Serializer):
     """ WPThemeModel serializes. As of now, it only performs data
         clean-up on tags
     """
-    theme_name = serpy.StrField(required=True)
+    theme_name = serpy.StrField(required=False)
     theme_uri = serpy.StrField(required=False)
     description = serpy.StrField(required=False)
     author = serpy.StrField(required=False)
