@@ -1,5 +1,9 @@
+import contextvars as ctxv
+import os
 from enum import Enum
-from typing import Any, Callable, Dict, Optional
+from typing import Any
+
+from .version import VERSION
 
 
 class RenderFormats(Enum):
@@ -9,68 +13,81 @@ class RenderFormats(Enum):
 
 RENDER_FORMATS = tuple(format_.value for format_ in RenderFormats)
 
-DEFAULT_CONFIG = {
-    'TIMEOUT': 5,
-    'USER_AGENT': "wpoke/0.1 (+you have been poked! Find out more at "
-                  "https://github.com/sonirico/wpoke)",
-    'INSTALLED_FINGERS': ("theme",),
-    'FORMAT': RenderFormats.JSON.value,
-    'ALLOWED_FORMATS': RENDER_FORMATS
-}
+TIMEOUT = int(os.getenv('TIMEOUT', 5))
+USER_AGENT = f"wpoke/{VERSION} (+you have been poked! Find " \
+    "out more at https://github.com/sonirico/wpoke)"
+
+INSTALLED_FINGERS = (
+    'theme',
+)
+
+MAX_REDIRECTS = int(os.getenv('MAX_REDIRECTS', 3))
 
 
 class SettingAttr(object):
-    def __init__(self, key: str, processor: Optional[Callable] = None):
-        self.name = key
-        self.processor = processor
+    """Implements a property descriptor for dict-like objects providing a
+    concurrent-safe manner to access and change context variables from coroutines
+    abstracting away the `contextvar.ContextVar` interface
+
+     When used as a class instance it will look up the key on the class
+     config object, for example:
+
+     .. code-block:: python
+         import asyncio
+         from contextvars import ContextVar, copy_context
+
+         class MyConfig(dict):
+             foo = SettingAttr('foo', ContextVar('foo', default='bar'))
+
+         obj = MyConfig()
+         obj.foo = 'bob'
+         for name in ('john', 'doe'):
+             ctx = contextvars.copy_context()
+             ctx.run(lambda: obj.foo = name)
+         assert obj.foo == 'bob'
+     """
+
+    def __init__(self, key: str, var: ctxv.ContextVar):
+        self.l_name = key.lower()
+        self.var = var
+        self._token = None
 
     def __get__(self, instance, owner) -> Any:
         if instance is None:
             return self
-        value = instance[self.name]
-        if self.processor is not None:
-            return self.processor(value)
-        return value
+        m_dict = instance.__dict__
+        if self.l_name not in m_dict:
+            instance.__dict__[self.l_name] = self.var
+        return instance.__dict__[self.l_name].get()
 
     def __set__(self, instance, value) -> None:
-        instance[self.name] = value
+        m_dict = instance.__dict__
+        if self.l_name not in m_dict:
+            m_dict[self.l_name] = self.var
+        self._token = m_dict[self.l_name].set(value)
+        return self._token
 
 
 class InvalidCliConfigurationException(Exception):
     pass
 
 
-class Settings(dict):
-    def __setattr__(self, key, value):
-        self.__setitem__(key, value)
-
-    def __getattr__(self, item):
-        if item in self:
-            return self.__getitem__(item)
-        u_item = item.upper()
-        if u_item in self:
-            return self.__getitem__(u_item)
-        l_item = item.lower()
-        if u_item in self:
-            return self.__getitem__(l_item)
-        raise AttributeError(item)
-
-
-class HTTPSettings(Settings):
-    """ Highly specialised on http whreabouts """
-
-    def __init__(self, base_config: Dict) -> None:
-        super().__init__(base_config)
-
-    @property
-    def request_config(self):
-        """ Return settings as expected by aiohttp """
-        return {
-            'timeout': self.timeout,
-            'headers': {
-                'User-Agent': self.user_agent
-            }
-        }
+class Settings:
+    ua: SettingAttr = SettingAttr('ua', ctxv.ContextVar('user_agent',
+                                                        default=USER_AGENT))
+    timeout: SettingAttr = SettingAttr('timeout',
+                                       ctxv.ContextVar('timeout',
+                                                       default=TIMEOUT))
+    installed_fingers = SettingAttr('installed_fingers',
+                                    ctxv.ContextVar('installed_fingers',
+                                                    default=INSTALLED_FINGERS))
+    max_redirects = SettingAttr('max_redirects',
+                                ctxv.ContextVar('max_redirects',
+                                                default=MAX_REDIRECTS))
+    output_format = SettingAttr('output_format',
+                                ctxv.ContextVar(
+                                    'output_format',
+                                    default=RenderFormats.JSON.value))
 
 
-settings = Settings(DEFAULT_CONFIG)
+settings = Settings()

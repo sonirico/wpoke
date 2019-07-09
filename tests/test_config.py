@@ -1,34 +1,20 @@
 import unittest
+from contextvars import ContextVar
 
-from wpoke.conf import DEFAULT_CONFIG
-from wpoke.conf import Settings
+from wpoke.conf import SettingAttr
+
+
+class TestSettings:
+    test_key = SettingAttr('test_key_b', ContextVar('no_test', default=1))
 
 
 class TestSettingsSetAttribute(unittest.TestCase):
-    def test_configure_normal(self):
-        settings = Settings()
-        settings['timeout'] = 10
-        self.assertEqual(10, settings.timeout)
+    def test_context_var_can_accessed_from_dict_and_data_descriptor(self):
+        settings = TestSettings()
+        self.assertEqual(settings.test_key, settings.test_key_b.get())
 
-
-class TestSettingsGetAttributes(unittest.TestCase):
-    def setUp(self):
-        self.settings = Settings(DEFAULT_CONFIG)
-
-    def test_settings_initialized(self):
-        expected_timeout = DEFAULT_CONFIG['TIMEOUT']
-        actual_timeout = self.settings['TIMEOUT']
-        self.assertEqual(expected_timeout, actual_timeout)
-
-    def test_settings_can_be_accessed_by_attrs_lowercase(self):
-        expected_timeout = DEFAULT_CONFIG['TIMEOUT']
-        actual_timeout = self.settings.timeout
-        self.assertEqual(expected_timeout, actual_timeout)
-
-    def test_settings_can_be_accessed_by_attrs_uppercase(self):
-        expected_timeout = DEFAULT_CONFIG['TIMEOUT']
-        actual_timeout = self.settings.TIMEOUT
-        self.assertEqual(expected_timeout, actual_timeout)
-
-    def test_settings_non_existent_key_raises_attribute_error(self):
-        self.assertRaises(AttributeError, lambda: self.settings.FAKE)
+    def test_context_var_can_be_set_from_dict_and_data_descriptor(self):
+        settings = TestSettings()
+        settings.test_key = 2
+        self.assertEqual(2, settings.test_key)
+        self.assertEqual(settings.test_key, settings.test_key_b.get())
