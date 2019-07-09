@@ -1,12 +1,16 @@
+#!/usr/bin/env python
+
 import argparse
 import asyncio
+import contextvars as ctxv
 import sys
 
 import uvloop
 from aiohttp import ClientSession
 
-from wpoke.conf import InvalidCliConfigurationException, Settings, DEFAULT_CONFIG
+from wpoke.conf import InvalidCliConfigurationException, settings
 from wpoke.loader import FingerRegistry
+from wpoke.fingers.theme import ThemeFinger
 
 
 def extract_cli_options(finger_registry):
@@ -51,7 +55,7 @@ def extract_cli_options(finger_registry):
     return parser, parser.parse_args()
 
 
-def load_settings(cli_options, settings):
+def load_settings(cli_options):
     """
     Set global configuration based on selected options defined in the CLI
     """
@@ -71,12 +75,12 @@ def load_settings(cli_options, settings):
 
 async def main():
     registry = FingerRegistry()
-    settings = Settings(DEFAULT_CONFIG)
-    registry.autodiscover_fingers(mods=settings.installed_fingers)
+    registry.register('theme', ThemeFinger)
+    # registry.autodiscover_fingers()
     cli_parser, cli_options = extract_cli_options(registry)
 
     try:
-        load_settings(cli_options, settings)
+        load_settings(cli_options)
     except InvalidCliConfigurationException as e:
         print(str(e))
         cli_parser.print_help()
@@ -85,18 +89,18 @@ async def main():
     poke_result = {}
 
     # TODO: Abstract away plugin orchestration as running them concurrently
-    # may server alarms go off
+    # may cause server alarms go off
+
     async with ClientSession() as session:
         # Perform remote lookups and obtain data
         for p_lookup_name, plugin in registry:
             plugin_result = await plugin.run(cli_options.url,
-                                             session,
-                                             **settings)
+                                             session)
             poke_result[p_lookup_name] = plugin_result
 
     # Iterate over fingers again so as to render data
     for p_lookup_name, plugin in registry:
-        plugin.render(poke_result[p_lookup_name], **settings)
+        plugin.render(poke_result[p_lookup_name])
 
 
 if __name__ == '__main__':
