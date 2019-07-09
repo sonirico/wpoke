@@ -4,9 +4,9 @@ import pytest
 from asynctest import CoroutineMock
 
 from wpoke.fingers.theme import exceptions as theme_exceptions
+from wpoke.fingers.theme.crawler import WPThemeMetadataCrawler
 from wpoke.fingers.theme.crawler import extract_info_from_css
 from wpoke.fingers.theme.crawler import extract_theme_path_candidates
-from wpoke.fingers.theme.crawler import get_screenshot
 from wpoke.fingers.theme.crawler import remove_duplicated_theme_urls
 from wpoke.fingers.theme.crawler import truncate_theme_url
 
@@ -15,8 +15,9 @@ from wpoke.fingers.theme.crawler import truncate_theme_url
 async def test_get_screenshot():
     session = CoroutineMock()
     session.head.return_value.__aenter__.return_value.status = 200
+    crawler = WPThemeMetadataCrawler(http_session=session)
     payload = 'http://wpoke.app/wp-content/themes/hola/'
-    actual = await get_screenshot(session, payload)
+    actual = await crawler.get_screenshot(payload)
     expected = f'{payload}screenshot.jpeg'
     assert actual == expected
 

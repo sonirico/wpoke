@@ -45,4 +45,3 @@ class WPThemeMetadata:
 
     def set_featured_image(self, img_link):
         self.featured_image = img_link
-
