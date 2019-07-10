@@ -2,8 +2,6 @@ import json
 import sys
 from typing import AnyStr, Dict, List
 
-from aiohttp import ClientSession
-
 from wpoke import exceptions as generic_exceptions
 from wpoke.conf import settings, RenderFormats
 from wpoke.finger import BaseFinger
@@ -24,11 +22,10 @@ class ThemeFinger(BaseFinger):
 
     async def run(self,
                   target: AnyStr,
-                  http_session: ClientSession,
                   **options) -> List[Dict]:
         try:
             crawler_config = theme_crawler.WPThemeMetadataConfiguration()
-            crawler = theme_crawler.WPThemeMetadataCrawler(http_session,
+            crawler = theme_crawler.WPThemeMetadataCrawler(self.session,
                                                            crawler_config)
             themes = await crawler.get_theme(target)
         except theme_exceptions.BundledThemeException as e:
