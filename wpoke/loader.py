@@ -45,6 +45,6 @@ class FingerRegistry:
         return self._registry
 
     def register(self, name: str, finger_cls: Type[BaseFinger]):
-        finger_instance = finger_cls()
-        self._registry[name] = finger_instance
-        return name, finger_instance
+        if not name or not name.strip():
+            name = finger_cls.__class__.__name__
+        self._registry[name] = finger_cls

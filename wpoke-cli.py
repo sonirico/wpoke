@@ -2,15 +2,16 @@
 
 import argparse
 import asyncio
-import contextvars as ctxv
+import json
 import sys
 
 import uvloop
-from aiohttp import ClientSession
 
+from wpoke.cli import Hand
 from wpoke.conf import InvalidCliConfigurationException, settings
+from wpoke.fingers import ThemeFinger
 from wpoke.loader import FingerRegistry
-from wpoke.fingers.theme import ThemeFinger
+from wpoke.models import HandResultSerializer
 
 
 def extract_cli_options(finger_registry):
@@ -73,10 +74,9 @@ def load_settings(cli_options):
         settings.FORMAT = cli_options.render_format
 
 
-async def main():
+def main(loop):
     registry = FingerRegistry()
     registry.register('theme', ThemeFinger)
-    # registry.autodiscover_fingers()
     cli_parser, cli_options = extract_cli_options(registry)
 
     try:
@@ -86,21 +86,10 @@ async def main():
         cli_parser.print_help()
         sys.exit(2)
 
-    poke_result = {}
-
-    # TODO: Abstract away plugin orchestration as running them concurrently
-    # may cause server alarms go off
-
-    async with ClientSession() as session:
-        # Perform remote lookups and obtain data
-        for p_lookup_name, plugin in registry:
-            plugin_result = await plugin.run(cli_options.url,
-                                             session)
-            poke_result[p_lookup_name] = plugin_result
-
-    # Iterate over fingers again so as to render data
-    for p_lookup_name, plugin in registry:
-        plugin.render(poke_result[p_lookup_name])
+    hand = Hand(registry)
+    loop.run_until_complete(hand.poke(cli_options.url))
+    hand_serializer = HandResultSerializer(hand.get_result())
+    print(json.dumps(hand_serializer.data, indent=2))
 
 
 if __name__ == '__main__':
@@ -109,7 +98,8 @@ if __name__ == '__main__':
 
         loop = asyncio.get_event_loop()
 
-        loop.run_until_complete(main())
+        main(loop)
+
     except KeyboardInterrupt:
         sys.exit(1)
     else:

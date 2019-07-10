@@ -155,10 +155,6 @@ class WPThemeMetadataCrawler:
             return response.status, body
 
     async def fetch_html_body(self, url: str):
-        """ Encapsulates request/response lifecycle management
-        :param url:
-        :return:
-        """
         status, body = await self._do_request(url, 'GET')
         raise_on_failure(status_code=status, has_body=bool(body))
         return body
