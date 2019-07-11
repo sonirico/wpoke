@@ -131,7 +131,7 @@ def extract_theme_path_by_global_regex(url: str,
 @dataclass
 class WPThemeMetadataConfiguration:
     timeout: int = settings.timeout
-    user_agent: str = settings.ua
+    user_agent: str = settings.user_agent
     max_redirects: int = settings.max_redirects
 
 
@@ -169,6 +169,8 @@ class WPThemeMetadataCrawler:
 
     async def get_screenshot(self,
                              url: str) -> Optional[str]:
+        """ Received a curated URL to a theme and returns theme
+        screenshot image path if any """
         for img_candidate_extension in ['jpeg', 'png', 'jpg']:
             screenshot_url = f'{url}screenshot.{img_candidate_extension}'
             status, _ = await self._do_request(screenshot_url, 'HEAD')

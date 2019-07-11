@@ -24,7 +24,10 @@ class ThemeFinger(BaseFinger):
                   target: AnyStr,
                   **options) -> List[Dict]:
         try:
-            crawler_config = theme_crawler.WPThemeMetadataConfiguration()
+            crawler_config = theme_crawler.WPThemeMetadataConfiguration(
+                timeout=settings.timeout,
+                user_agent=settings.user_agent,
+                max_redirects=settings.max_redirects)
             crawler = theme_crawler.WPThemeMetadataCrawler(self.session,
                                                            crawler_config)
             themes = await crawler.get_theme(target)
