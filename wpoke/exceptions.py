@@ -28,3 +28,7 @@ class ValidationError(Exception):
 
         self.message = message
         self.code = code
+
+
+class DuplicatedFingerException(Exception):
+    pass

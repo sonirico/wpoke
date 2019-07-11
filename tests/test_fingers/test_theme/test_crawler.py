@@ -15,6 +15,7 @@ from wpoke.fingers.theme.crawler import truncate_theme_url
 async def test_get_screenshot():
     session = CoroutineMock()
     session.head.return_value.__aenter__.return_value.status = 200
+    session.head.return_value.__aenter__.return_value.text = CoroutineMock()
     crawler = WPThemeMetadataCrawler(http_session=session)
     payload = 'http://wpoke.app/wp-content/themes/hola/'
     actual = await crawler.get_screenshot(payload)

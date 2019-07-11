@@ -7,14 +7,13 @@ import sys
 
 import uvloop
 
-from wpoke.cli import Hand
 from wpoke.conf import InvalidCliConfigurationException, settings
 from wpoke.fingers import ThemeFinger
-from wpoke.loader import FingerRegistry
+from wpoke.hand import Hand
 from wpoke.models import HandResultSerializer
 
 
-def extract_cli_options(finger_registry):
+def extract_cli_options(hand: Hand):
     """
     Based on the cli options configured in every registry, load the
     pertinent settings from them
@@ -32,7 +31,7 @@ def extract_cli_options(finger_registry):
                         help='Output format. {json|cli}',
                         required=False)
 
-    for lookup_key, finger in finger_registry:
+    for lookup_key, finger in hand.registered_fingers:
         short_arg_name = getattr(finger.Cli, 'short_flag', None)
         long_arg_name = getattr(finger.Cli, 'long_flag', None)
         help_text = getattr(finger.Cli, 'help_text', None)
@@ -62,22 +61,22 @@ def load_settings(cli_options):
     """
     # User-Agent http header
     if cli_options.useragent:
-        settings.USER_AGENT = cli_options.useragent
+        settings.user_agent = cli_options.useragent
     # Global timeout
     if cli_options.timeout:
-        settings.TIMEOUT = cli_options.timeout
+        settings.timeout = cli_options.timeout
     # Output format
     if cli_options.render_format:
         if cli_options.render_format not in settings.ALLOWED_FORMATS:
             message = f'unknown format: {cli_options.render_format}'
             raise InvalidCliConfigurationException(message)
-        settings.FORMAT = cli_options.render_format
+        settings.output_format = cli_options.render_format
 
 
-def main(loop):
-    registry = FingerRegistry()
-    registry.register('theme', ThemeFinger)
-    cli_parser, cli_options = extract_cli_options(registry)
+def main(event_loop: asyncio.AbstractEventLoop):
+    hand = Hand()
+    hand.add_finger(ThemeFinger, "theme_metadata")
+    cli_parser, cli_options = extract_cli_options(hand)
 
     try:
         load_settings(cli_options)
@@ -86,8 +85,7 @@ def main(loop):
         cli_parser.print_help()
         sys.exit(2)
 
-    hand = Hand(registry)
-    loop.run_until_complete(hand.poke(cli_options.url))
+    event_loop.run_until_complete(hand.poke(cli_options.url))
     hand_serializer = HandResultSerializer(hand.get_result())
     print(json.dumps(hand_serializer.data, indent=2))
 

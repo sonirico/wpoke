@@ -73,8 +73,9 @@ class InvalidCliConfigurationException(Exception):
 
 
 class Settings:
-    ua: SettingAttr = SettingAttr('ua', ctxv.ContextVar('user_agent',
-                                                        default=USER_AGENT))
+    user_agent: SettingAttr = SettingAttr('user_agent',
+                                          ctxv.ContextVar('user_agent',
+                                                          default=USER_AGENT))
     timeout: SettingAttr = SettingAttr('timeout',
                                        ctxv.ContextVar('timeout',
                                                        default=TIMEOUT))
