@@ -1,0 +1,18 @@
+os: linux
+dist: xenial
+sudo: false
+language: python
+python:
+  - "3.7.3"
+  - "3.7-dev"
+  - "3.8-dev"
+  - "nightly"
+
+install:
+  - pip install -U pip
+  - pip install poetry
+  - pip install tox-travis
+
+script:
+  - tox
+
