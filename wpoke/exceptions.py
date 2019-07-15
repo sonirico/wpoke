@@ -32,3 +32,7 @@ class ValidationError(Exception):
 
 class DuplicatedFingerException(Exception):
     pass
+
+
+class DataStoreAttributeNotFound(AttributeError):
+    pass
