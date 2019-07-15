@@ -11,6 +11,7 @@ from wpoke.conf import InvalidCliConfigurationException, settings
 from wpoke.fingers import ThemeFinger
 from wpoke.hand import Hand
 from wpoke.models import HandResultSerializer
+from wpoke.store import push_store, DataStore
 
 
 def extract_cli_options(hand: Hand):
@@ -74,6 +75,9 @@ def load_settings(cli_options):
 
 
 def main(event_loop: asyncio.AbstractEventLoop):
+    cli_store = DataStore()
+    push_store(cli_store)
+
     hand = Hand()
     hand.add_finger(ThemeFinger, "theme_metadata")
     cli_parser, cli_options = extract_cli_options(hand)

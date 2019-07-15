@@ -10,6 +10,7 @@ from lxml import etree
 
 from wpoke import exceptions as general_exceptions
 from wpoke.conf import settings
+from wpoke.store import peek_store
 from wpoke.validators.url import validate_url
 from .exceptions import *
 from .models import WPThemeMetadata, WPThemeModelDisplay
@@ -141,6 +142,7 @@ class WPThemeMetadataCrawler:
                  http_config: Optional[WPThemeMetadataConfiguration] = None):
         self.http_session = http_session
         self.http_config = http_config or WPThemeMetadataConfiguration()
+        self.store = peek_store()
 
     @property
     def request_options(self):
@@ -155,8 +157,11 @@ class WPThemeMetadataCrawler:
             return response.status, body
 
     async def fetch_html_body(self, url: str):
+        if self.store.has("INDEX_BODY"):
+            return self.store.INDEX_BODY
         status, body = await self._do_request(url, 'GET')
         raise_on_failure(status_code=status, has_body=bool(body))
+        self.store.INDEX_BODY = body
         return body
 
     async def fetch_style_css(self, url: str):
@@ -189,6 +194,7 @@ class WPThemeMetadataCrawler:
 
     async def get_theme(self, url: str) -> List[WPThemeMetadata]:
         try:
+
             html_content = await self.fetch_html_body(url)
 
             if not html_content:
