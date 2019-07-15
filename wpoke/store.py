@@ -65,3 +65,25 @@ class DataStore:
 
     def clear(self) -> None:
         self.__store__.clear()
+
+
+__store_stack__ = []  # pragma: nocover
+
+
+def get_store():
+    pass
+
+
+def push_store(store: DataStore) -> None:
+    __store_stack__.append(store)
+
+
+def pop_store(**kwargs) -> DataStore:
+    return __store_stack__.pop(**kwargs)
+
+
+def peek_store():
+    return __store_stack__[-1]
+
+
+push_store(DataStore())
