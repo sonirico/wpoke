@@ -1,4 +1,4 @@
-from typing import (Any, AnyStr, List)
+from typing import (Any, AnyStr, List, Optional)
 
 from .exceptions import DataStoreAttributeNotFound
 
@@ -67,23 +67,44 @@ class DataStore:
         self.__store__.clear()
 
 
-__store_stack__ = []  # pragma: nocover
+class StoreAppStack:
+    def __init__(self):
+        self.stack = []
+
+    def push(self, store: DataStore) -> None:
+        self.stack.append(store)
+
+    @property
+    def size(self):
+        return len(self.stack)
+
+    def is_empty(self) -> bool:
+        return self.size < 1
+
+    def peek(self) -> Optional[DataStore]:
+        if self.is_empty():
+            return None
+        return self.stack[-1]
+
+    def pop(self) -> Optional[DataStore]:
+        if self.is_empty():
+            return None
+        return self.stack.pop()
 
 
-def get_store():
-    pass
+__store_stack__ = StoreAppStack()  # pragma: nocover
 
 
 def push_store(store: DataStore) -> None:
-    __store_stack__.append(store)
+    __store_stack__.push(store)
 
 
-def pop_store(**kwargs) -> DataStore:
-    return __store_stack__.pop(**kwargs)
+def pop_store() -> Optional[DataStore]:
+    return __store_stack__.pop()
 
 
-def peek_store():
-    return __store_stack__[-1]
+def peek_store() -> Optional[DataStore]:
+    return __store_stack__.peek()
 
 
 push_store(DataStore())
