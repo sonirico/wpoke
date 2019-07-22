@@ -3,7 +3,7 @@ import unittest
 import pytest
 from asynctest import CoroutineMock
 
-from wpoke.fingers.theme import exceptions as theme_exceptions
+import wpoke.exceptions
 from wpoke.fingers.theme.crawler import WPThemeMetadataCrawler
 from wpoke.fingers.theme.crawler import extract_info_from_css
 from wpoke.fingers.theme.crawler import extract_theme_path_candidates
@@ -71,7 +71,7 @@ class TestThemeCrawlerExtractInfoFromCSS(unittest.TestCase):
     def test_extract_css_info_empty(self):
         mocked_css = self.fixture_content('crawlers/theme/css/empty.css')
 
-        with self.assertRaises(theme_exceptions.BundledThemeException):
+        with self.assertRaises(wpoke.exceptions.BundledThemeException):
             extract_info_from_css(mocked_css)
 
     def test_extract_css_info_duplicated_fetchs_first_match(self):
