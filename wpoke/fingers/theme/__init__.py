@@ -44,6 +44,3 @@ class ThemeFinger(BaseFinger):
         fmt = settings.output_format
         if not fmt or fmt == RenderFormats.JSON.value:
             print(json.dumps(result, indent=4), file=out)
-
-
-finger_cls = ThemeFinger
