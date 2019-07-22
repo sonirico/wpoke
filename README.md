@@ -75,8 +75,8 @@ As of now, configurable parameters are:
 ## Roll down your own checks (aka fingers)
 
 ```python
+import requests
 from wpoke.hand import Hand
-from wpoke import start
 
 hand = Hand()
 
