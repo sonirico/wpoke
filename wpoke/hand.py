@@ -7,6 +7,10 @@ from .exceptions import DuplicatedFingerException
 from .models import (HandResult, FingerResult)
 from .finger import BaseFinger
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 def _now():
     return datetime.utcnow()
@@ -33,9 +37,7 @@ class Hand:
     """ A runner of fingers """
 
     def __init__(self):
-        self.pokes: List = list()
         self._finger_registry: FingerRegistry = FingerRegistry()
-        self.result: HandResult = HandResult()
         self.session: ClientSession = ClientSession()
 
     @property
@@ -59,23 +61,8 @@ class Hand:
         self._finger_registry.add_finger(lookup_name,
                                          finger_cls(session=self.session))
 
-    def add_result(self, result: FingerResult) -> None:
-        self.pokes.append(result)
-
-    def get_pokes(self) -> List[FingerResult]:
-        return self.pokes
-
-    def clear_pokes(self) -> None:
-        self.pokes = []
-
-    def clear_result(self) -> None:
-        del self.result
-        self.result = HandResult()
-
-    def get_result(self) -> HandResult:
-        return self.result
-
-    async def _poke(self, target_url: AnyStr) -> None:
+    async def _poke(self, target_url: AnyStr) -> List[Any]:
+        pokes = []
         async with self.session:
             for finger_name, finger in self.registered_fingers:
                 result = FingerResult()
@@ -83,24 +70,26 @@ class Hand:
                 result.started_at = _now()
                 try:
                     result.data = await finger.run(target_url)
-                except Exception:
+                except Exception as e:
+                    logger.error(str(e))
                     result.status = 1
                 else:
                     result.status = 0
                 result.finished_at = _now()
-                self.add_result(result)
+                pokes.append(result)
+        return pokes
 
     async def poke(self, target_url: AnyStr) -> HandResult:
-        self.result.started_at = _now()
-        await self._poke(target_url)
-        self.result.finished_at = _now()
-        self.result.loaded_fingers = self._finger_registry.finger_names
-        self.result.pokes = self.pokes
-        self.result.serial_runtime = sum(result.runtime
-                                         for result in self.pokes)
-        self.result.parallel_runtime = max(result.runtime
-                                           for result in self.pokes)
-        return self.result
+        result = HandResult()
+        result.started_at = _now()
+        pokes = await self._poke(target_url)
+        result.finished_at = _now()
+        result.loaded_fingers = self._finger_registry.finger_names
+        result.pokes = pokes
+        result.serial_runtime = sum(result.runtime for result in pokes)
+        if pokes:
+            result.parallel_runtime = max(result.runtime for result in pokes)
+        return result
 
     def dispose(self):
         self.session.close()
