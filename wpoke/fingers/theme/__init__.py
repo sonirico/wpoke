@@ -2,12 +2,12 @@ import json
 import sys
 from typing import AnyStr, Dict, List
 
+import wpoke.exceptions
 from wpoke import exceptions as generic_exceptions
 from wpoke.conf import settings, RenderFormats
 from wpoke.finger import BaseFinger
 from wpoke.fingers.theme.serializers import WPThemeMetadataSerializer
 from . import crawler as theme_crawler
-from . import exceptions as theme_exceptions
 
 
 class ThemeFinger(BaseFinger):
@@ -31,7 +31,7 @@ class ThemeFinger(BaseFinger):
             crawler = theme_crawler.WPThemeMetadataCrawler(self.session,
                                                            crawler_config)
             themes = await crawler.get_theme(target)
-        except theme_exceptions.BundledThemeException as e:
+        except wpoke.exceptions.BundledThemeException as e:
             print(e.message)
         except generic_exceptions.TargetTimeout:
             timeout = settings.timeout

@@ -10,9 +10,9 @@ from lxml import etree
 
 from wpoke import exceptions as general_exceptions
 from wpoke.conf import settings
+from wpoke.exceptions import ThemePathMissingException, BundledThemeException
 from wpoke.store import peek_store
 from wpoke.validators.url import validate_url
-from .exceptions import *
 from .models import WPThemeMetadata, WPThemeModelDisplay
 
 
