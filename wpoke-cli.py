@@ -74,7 +74,7 @@ def load_settings(cli_options):
         settings.output_format = cli_options.render_format
 
 
-def main(event_loop: asyncio.AbstractEventLoop):
+async def main():
     cli_store = DataStore()
     push_store(cli_store)
 
@@ -89,19 +89,16 @@ def main(event_loop: asyncio.AbstractEventLoop):
         cli_parser.print_help()
         sys.exit(2)
 
-    event_loop.run_until_complete(hand.poke(cli_options.url))
-    hand_serializer = HandResultSerializer(hand.get_result())
+    result = await hand.poke(cli_options.url)
+    hand_serializer = HandResultSerializer(result)
     print(json.dumps(hand_serializer.data, indent=2))
 
 
 if __name__ == '__main__':
     try:
         asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-
         loop = asyncio.get_event_loop()
-
-        main(loop)
-
+        loop.run_until_complete(main())
     except KeyboardInterrupt:
         sys.exit(1)
     else:
