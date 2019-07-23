@@ -140,7 +140,7 @@ class WPThemeMetadataCrawler:
     def __init__(self,
                  http_session: ClientSession,
                  http_config: Optional[WPThemeMetadataConfiguration] = None):
-        self.http_session = http_session
+        self.session = http_session
         self.http_config = http_config or WPThemeMetadataConfiguration()
         self.store = peek_store()
 
@@ -151,8 +151,9 @@ class WPThemeMetadataCrawler:
                     headers={'User-Agent': self.http_config.user_agent})
 
     async def _do_request(self, target_url: str, http_method: str = 'GET'):
-        method = getattr(self.http_session, http_method.lower())
-        async with method(target_url, **self.request_options) as response:
+        async with self.session.request(method=http_method.lower(),
+                                        url=target_url,
+                                        **self.request_options) as response:
             body = await response.text()
             return response.status, body
 
