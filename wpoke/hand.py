@@ -36,9 +36,9 @@ class FingerRegistry(Dict):
 class Hand:
     """ A runner of fingers """
 
-    def __init__(self):
-        self._finger_registry: FingerRegistry = FingerRegistry()
-        self.session: ClientSession = ClientSession()
+    def __init__(self, session: ClientSession):
+        self._finger_registry: _FingerRegistry = _FingerRegistry()
+        self.session = session
 
     @property
     def registered_fingers(self):
@@ -55,28 +55,28 @@ class Hand:
         """
         assert issubclass(finger_cls, BaseFinger), \
             "All fingers must inherit from BaseFinger"
-        finger_name = lookup_name or finger_cls.__class__.__name__.lower()
-        if self._finger_registry.has_finger(finger_name):
-            raise DuplicatedFingerException(f"{finger_name} is already registered")
+        lookup_name = lookup_name or finger_cls.__name__.lower()
+        if self._finger_registry.has_finger(lookup_name):
+            raise DuplicatedFingerException(
+                f"{lookup_name} is already registered")
         self._finger_registry.add_finger(lookup_name,
                                          finger_cls(session=self.session))
 
     async def _poke(self, target_url: AnyStr) -> List[Any]:
         pokes = []
-        async with self.session:
-            for finger_name, finger in self.registered_fingers:
-                result = FingerResult()
-                result.finger_origin = finger_name
-                result.started_at = _now()
-                try:
-                    result.data = await finger.run(target_url)
-                except Exception as e:
-                    logger.error(str(e))
-                    result.status = 1
-                else:
-                    result.status = 0
-                result.finished_at = _now()
-                pokes.append(result)
+        for finger_name, finger in self.registered_fingers:
+            result = FingerResult()
+            result.finger_origin = finger_name
+            result.started_at = _now()
+            try:
+                result.data = await finger.run(target_url)
+            except Exception as e:
+                logger.error(str(e))
+                result.status = 1
+            else:
+                result.status = 0
+            result.finished_at = _now()
+            pokes.append(result)
         return pokes
 
     async def poke(self, target_url: AnyStr) -> HandResult:
@@ -90,15 +90,3 @@ class Hand:
         if pokes:
             result.parallel_runtime = max(result.runtime for result in pokes)
         return result
-
-    def dispose(self):
-        self.session.close()
-
-    async def __aenter__(self) -> 'Hand':
-        return self
-
-    async def __aexit__(self,
-                        exc_type: Optional[Type[BaseException]],
-                        exc_val: Optional[BaseException],
-                        exc_tb: Optional[Any]) -> None:
-        await self.dispose()

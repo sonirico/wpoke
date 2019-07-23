@@ -6,6 +6,7 @@ import json
 import sys
 
 import uvloop
+from aiohttp import ClientSession
 
 from wpoke.conf import InvalidCliConfigurationException, settings
 from wpoke.fingers import ThemeFinger
@@ -78,20 +79,21 @@ async def main():
     cli_store = DataStore()
     push_store(cli_store)
 
-    hand = Hand()
-    hand.add_finger(ThemeFinger, "theme_metadata")
-    cli_parser, cli_options = extract_cli_options(hand)
+    async with ClientSession() as session:
+        hand = Hand(session=session)
+        hand.add_finger(ThemeFinger, "theme_metadata")
+        cli_parser, cli_options = extract_cli_options(hand)
 
-    try:
-        load_settings(cli_options)
-    except InvalidCliConfigurationException as e:
-        print(str(e))
-        cli_parser.print_help()
-        sys.exit(2)
+        try:
+            load_settings(cli_options)
+        except InvalidCliConfigurationException as e:
+            print(str(e))
+            cli_parser.print_help()
+            sys.exit(2)
 
-    result = await hand.poke(cli_options.url)
-    hand_serializer = HandResultSerializer(result)
-    print(json.dumps(hand_serializer.data, indent=2))
+        result = await hand.poke(cli_options.url)
+        hand_serializer = HandResultSerializer(result)
+        print(json.dumps(hand_serializer.data, indent=2))
 
 
 if __name__ == '__main__':
