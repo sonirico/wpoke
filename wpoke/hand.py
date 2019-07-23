@@ -1,13 +1,12 @@
+import logging
 from datetime import datetime
 from typing import Any, AnyStr, Dict, Optional, List, Type
 
 from aiohttp import ClientSession
 
 from .exceptions import DuplicatedFingerException
-from .models import (HandResult, FingerResult)
 from .finger import BaseFinger
-
-import logging
+from .models import (HandResult, FingerResult)
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +15,7 @@ def _now():
     return datetime.utcnow()
 
 
-class FingerRegistry(Dict):
+class _FingerRegistry(Dict):
     @property
     def finger_names(self) -> List[AnyStr]:
         return list(sorted(self.keys()))
