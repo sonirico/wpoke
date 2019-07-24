@@ -42,9 +42,7 @@ class Hand:
         return self._finger_registry
 
     def add_finger(
-        self,
-        finger_cls: Type[BaseFinger],
-        lookup_name: Optional[AnyStr] = None
+        self, finger_cls: Type[BaseFinger], lookup_name: Optional[AnyStr] = None
     ):
         """
         :param finger_cls:
@@ -64,8 +62,7 @@ class Hand:
         if self._finger_registry.has_finger(lookup_name):
             msg = f"{lookup_name} is already registered"
             raise DuplicatedFingerException(msg)
-        self._finger_registry.add_finger(lookup_name,
-                                         finger_cls(session=self.session))
+        self._finger_registry.add_finger(lookup_name, finger_cls(session=self.session))
 
     async def _poke(self, target_url: AnyStr) -> List[Any]:
         pokes = []
