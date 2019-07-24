@@ -1,0 +1,7 @@
+pytest-asyncio
+ipdb
+pytest
+mock
+asynctest
+tox
+black
