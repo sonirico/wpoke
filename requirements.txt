@@ -1,0 +1,8 @@
+serpy
+lxml
+ipaddress
+uvloop
+aiohttp
+dynaconf
+aiodns
+

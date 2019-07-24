@@ -33,28 +33,34 @@ contribute! :)
     - Author name and URL
 
 ## Installing
+~~I'd rather have a deterministic dependency manager. That's why
+this projects employs poetry~~. Ejem well, I'm pretty tired of running into
+weird issues on different environments due to these exotic dep managers,
+should I will stick back to pip for now.
 
-I'd rather have a deterministic dependency manager. That's why
-this projects employs [poetry](https://poetry.eustace.io/)
-
-##### Install poetry with pip (he)
+##### Install with setup.py
 
 ```shell
-pip install -U poetry
 # clone the repo
 git clone git@github.com:sonirico/wpoke.git
 cd wpoke/
 # Within a virtualenv or not
-poetry install
+python setup.py install
+```
+
+##### Install from pypi
+
+```shell
+pip install -U pip  # Make sure pip is updated
+pip install wpoke
 ```
 
 ## Run from cli
 
 ```shell
 python3.7 -m venv venv
-pip install -U poetry
 source venv/bin/activate
-poetry install
+python setup.py install
 ./wpoke-cli.py https://wordpress.com/
 ```
 
