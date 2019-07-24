@@ -22,6 +22,7 @@ pytest = "^4.3"
 mock = "^2.0"
 asynctest = "^0.12.2"
 tox = "=3.7.0"
+black = "=19.3b0"
 
 [build-system]
 requires = ["poetry>=0.12"]

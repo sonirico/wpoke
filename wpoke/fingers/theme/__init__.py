@@ -12,22 +12,21 @@ from . import crawler as theme_crawler
 
 class ThemeFinger(BaseFinger):
     class Meta:
-        name = 'theme_metadata'
+        name = "theme_metadata"
 
     class Cli:
-        help_text = 'Display themes information'
+        help_text = "Display themes information"
         required = False
-        short_flag = '-t'
-        long_flag = '--theme'
+        short_flag = "-t"
+        long_flag = "--theme"
 
-    async def run(self,
-                  target: AnyStr,
-                  **options) -> List[Dict]:
+    async def run(self, target: AnyStr, **options) -> List[Dict]:
         try:
             crawler_config = theme_crawler.WPThemeMetadataConfiguration(
                 timeout=settings.timeout,
                 user_agent=settings.user_agent,
-                max_redirects=settings.max_redirects)
+                max_redirects=settings.max_redirects,
+            )
             crawler = theme_crawler.WPThemeMetadataCrawler(self.session,
                                                            crawler_config)
             themes = await crawler.get_theme(target)
@@ -35,7 +34,7 @@ class ThemeFinger(BaseFinger):
             print(e.message)
         except generic_exceptions.TargetTimeout:
             timeout = settings.timeout
-            print(f'Target timeout. Try to set a value higher than {timeout}')
+            print(f"Target timeout. Try to set a value higher than {timeout}")
         else:
             serializer = WPThemeMetadataSerializer(themes, many=True)
             return serializer.data

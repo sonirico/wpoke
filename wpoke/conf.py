@@ -7,27 +7,27 @@ from .version import VERSION
 
 
 class RenderFormats(Enum):
-    JSON = 'json'
-    CLI = 'cli'
+    JSON = "json"
+    CLI = "cli"
 
 
 RENDER_FORMATS = tuple(format_.value for format_ in RenderFormats)
 
-TIMEOUT = int(os.getenv('TIMEOUT', 5))
-USER_AGENT = f"wpoke/{VERSION} (+you have been poked! Find " \
+TIMEOUT = int(os.getenv("TIMEOUT", 5))
+USER_AGENT = (
+    f"wpoke/{VERSION} (+you have been poked! Find "
     "out more at https://github.com/sonirico/wpoke)"
-
-INSTALLED_FINGERS = (
-    'theme',
 )
 
-MAX_REDIRECTS = int(os.getenv('MAX_REDIRECTS', 3))
+INSTALLED_FINGERS = ("theme",)
+
+MAX_REDIRECTS = int(os.getenv("MAX_REDIRECTS", 3))
 
 
 class SettingAttr(object):
     """Implements a property descriptor for dict-like objects providing a
-    concurrent-safe manner to access and change context variables from coroutines
-    abstracting away the `contextvar.ContextVar` interface
+    concurrent-safe manner to access and change context variables from
+    coroutines abstracting away the `contextvar.ContextVar` interface
 
      When used as a class instance it will look up the key on the class
      config object, for example:
@@ -73,22 +73,24 @@ class InvalidCliConfigurationException(Exception):
 
 
 class Settings:
-    user_agent: SettingAttr = SettingAttr('user_agent',
-                                          ctxv.ContextVar('user_agent',
-                                                          default=USER_AGENT))
-    timeout: SettingAttr = SettingAttr('timeout',
-                                       ctxv.ContextVar('timeout',
-                                                       default=TIMEOUT))
-    installed_fingers = SettingAttr('installed_fingers',
-                                    ctxv.ContextVar('installed_fingers',
-                                                    default=INSTALLED_FINGERS))
-    max_redirects = SettingAttr('max_redirects',
-                                ctxv.ContextVar('max_redirects',
-                                                default=MAX_REDIRECTS))
-    output_format = SettingAttr('output_format',
-                                ctxv.ContextVar(
-                                    'output_format',
-                                    default=RenderFormats.JSON.value))
+    user_agent: SettingAttr = SettingAttr(
+        "user_agent", ctxv.ContextVar("user_agent", default=USER_AGENT)
+    )
+    timeout: SettingAttr = SettingAttr(
+        "timeout", ctxv.ContextVar("timeout", default=TIMEOUT)
+    )
+    installed_fingers = SettingAttr(
+        "installed_fingers",
+        ctxv.ContextVar("installed_fingers", default=INSTALLED_FINGERS),
+    )
+    max_redirects = SettingAttr(
+        "max_redirects", ctxv.ContextVar("max_redirects",
+                                         default=MAX_REDIRECTS)
+    )
+    output_format = SettingAttr(
+        "output_format",
+        ctxv.ContextVar("output_format", default=RenderFormats.JSON.value),
+    )
 
 
 settings = Settings()

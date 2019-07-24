@@ -1,4 +1,4 @@
-from typing import (Any, AnyStr, List, Optional)
+from typing import Any, AnyStr, List, Optional
 
 from .exceptions import DataStoreAttributeNotFound
 
@@ -6,7 +6,7 @@ from .exceptions import DataStoreAttributeNotFound
 class DataStore:
     def __init__(self, **kwargs):
         self.__store__ = dict()
-        self.prefix = kwargs.pop('prefix', "").upper()
+        self.prefix = kwargs.pop("prefix", "").upper()
         super().__init__(**kwargs)
 
     def __getitem__(self, item: str) -> Any:

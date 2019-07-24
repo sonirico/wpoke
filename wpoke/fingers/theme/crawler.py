@@ -33,7 +33,7 @@ def extract_info_from_css(css_content: str) -> WPThemeMetadata:
     """
     any_match = False
     wp_meta = WPThemeMetadata()
-    css_content = css_content.replace('\r', '\n')
+    css_content = css_content.replace("\r", "\n")
 
     for k, v in WPThemeModelDisplay():
         # https://github.com/WordPress/WordPress/blob/aab929b8d619bde14495a97cdc1eb7bdf1f1d487/wp-includes/functions.php#L5182
@@ -42,7 +42,7 @@ def extract_info_from_css(css_content: str) -> WPThemeMetadata:
         match = re.search(regex, css_content)
 
         if match:
-            meta_value = match.group('meta_value').strip()
+            meta_value = match.group("meta_value").strip()
             wp_meta.set_value_for_key(k, meta_value)
             any_match = True
 
@@ -57,12 +57,12 @@ def truncate_theme_url(url: str) -> str:
     :param url: Full url containing the /wp-content/themes sub string
     :return: url from protocol scheme to theme name
     """
-    regex = re.compile(r'.*/wp-content/themes/[_\-\w+]+/')
+    regex = re.compile(r".*/wp-content/themes/[_\-\w+]+/")
     return regex.search(url).group()
 
 
-def remove_duplicated_theme_urls(urls: Union[List[str],
-                                             Iterator[str]]) -> Set[str]:
+def remove_duplicated_theme_urls(
+        urls: Union[List[str], Iterator[str]]) -> Set[str]:
     """
     :param urls: All urls containing /wp-content/themes/
     :return: set of unique urls from protocol scheme to theme name
@@ -70,8 +70,7 @@ def remove_duplicated_theme_urls(urls: Union[List[str],
     return {truncate_theme_url(url) for url in urls}
 
 
-def extract_theme_path_candidates(url: str,
-                                  html: str) -> Optional[List[str]]:
+def extract_theme_path_candidates(url: str, html: str) -> Optional[List[str]]:
     """ Scrapes all possible urls in a html document potentially
         disclosing available active themes
     :param url: Target website
@@ -118,7 +117,7 @@ def extract_theme_path_candidates(url: str,
 def extract_theme_path_by_global_regex(url: str,
                                        html: str) -> Optional[List[str]]:
     """ Performs a cross text search in the document, ignoring markup. """
-    regex_str = r'(?://|https?)(?:.*?)/wp-content/themes/[\d\w\-_]+/'
+    regex_str = r"(?://|https?)(?:.*?)/wp-content/themes/[\d\w\-_]+/"
     regex = re.compile(regex_str, re.IGNORECASE)
     result = re.findall(regex, html)
 
@@ -137,56 +136,58 @@ class WPThemeMetadataConfiguration:
 
 
 class WPThemeMetadataCrawler:
-    def __init__(self,
-                 http_session: ClientSession,
-                 http_config: Optional[WPThemeMetadataConfiguration] = None):
+    def __init__(
+        self,
+        http_session: ClientSession,
+        http_config: Optional[WPThemeMetadataConfiguration] = None,
+    ):
         self.session = http_session
         self.http_config = http_config or WPThemeMetadataConfiguration()
         self.store = peek_store()
 
     @property
     def request_options(self):
-        return dict(timeout=self.http_config.timeout,
-                    max_redirects=self.http_config.max_redirects,
-                    headers={'User-Agent': self.http_config.user_agent})
+        return dict(
+            timeout=self.http_config.timeout,
+            max_redirects=self.http_config.max_redirects,
+            headers={"User-Agent": self.http_config.user_agent},
+        )
 
-    async def _do_request(self, target_url: str, http_method: str = 'GET'):
-        async with self.session.request(method=http_method.lower(),
-                                        url=target_url,
-                                        **self.request_options) as response:
+    async def _do_request(self, target_url: str, http_method: str = "GET"):
+        async with self.session.request(
+            method=http_method.lower(), url=target_url, **self.request_options
+        ) as response:
             body = await response.text()
             return response.status, body
 
     async def fetch_html_body(self, url: str):
         if self.store.has("INDEX_BODY"):
             return self.store.INDEX_BODY
-        status, body = await self._do_request(url, 'GET')
+        status, body = await self._do_request(url, "GET")
         raise_on_failure(status_code=status, has_body=bool(body))
         self.store.INDEX_BODY = body
         return body
 
     async def fetch_style_css(self, url: str):
-        status, css_content = await self._do_request(url, 'GET')
+        status, css_content = await self._do_request(url, "GET")
         css_length = len(css_content)
-        raise_on_failure(status_code=status,
-                         has_body=bool(css_content))
+        raise_on_failure(status_code=status, has_body=bool(css_content))
         # https://github.com/WordPress/WordPress/blob/aab929b8d619bde14495a97cdc1eb7bdf1f1d487/wp-includes/functions.php#L5156
-        return css_content[:(8192 if css_length >= 8192 else css_length)]
+        return css_content[: (8192 if css_length >= 8192 else css_length)]
 
-    async def get_screenshot(self,
-                             url: str) -> Optional[str]:
+    async def get_screenshot(self, url: str) -> Optional[str]:
         """ Received a curated URL to a theme and returns theme
         screenshot image path if any """
-        for img_candidate_extension in ['jpeg', 'png', 'jpg']:
-            screenshot_url = f'{url}screenshot.{img_candidate_extension}'
-            status, _ = await self._do_request(screenshot_url, 'HEAD')
+        for img_candidate_extension in ["jpeg", "png", "jpg"]:
+            screenshot_url = f"{url}screenshot.{img_candidate_extension}"
+            status, _ = await self._do_request(screenshot_url, "HEAD")
             if 200 <= status <= 299:
                 return screenshot_url
         return None
 
-    async def add_extra_features(self,
-                                 url: str,
-                                 model: WPThemeMetadata) -> WPThemeMetadata:
+    async def add_extra_features(
+        self, url: str, model: WPThemeMetadata
+    ) -> WPThemeMetadata:
         # Screenshot feature
         screenshot = await self.get_screenshot(url)
         if screenshot:
@@ -209,7 +210,7 @@ class WPThemeMetadataCrawler:
             theme_models = []
 
             for candidate_url in candidates:
-                style_css_path = candidate_url + 'style.css'
+                style_css_path = candidate_url + "style.css"
                 css_content = await self.fetch_style_css(style_css_path)
 
                 try:
@@ -217,8 +218,9 @@ class WPThemeMetadataCrawler:
                 except BundledThemeException:
                     continue
                 else:
-                    theme_model = await self.add_extra_features(candidate_url,
-                                                                theme_model)
+                    theme_model = await self.add_extra_features(
+                        candidate_url, theme_model
+                    )
                     theme_models.append(theme_model)
 
             if len(theme_models) < 1:
