@@ -12,7 +12,7 @@ from . import crawler as theme_crawler
 
 class ThemeFinger(BaseFinger):
     class Meta:
-        name = 'theme'
+        name = 'theme_metadata'
 
     class Cli:
         help_text = 'Display themes information'

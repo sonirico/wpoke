@@ -54,7 +54,12 @@ class Hand:
         """
         assert issubclass(finger_cls, BaseFinger), \
             "All fingers must inherit from BaseFinger"
-        lookup_name = lookup_name or finger_cls.__name__.lower()
+        try:
+            lookup_name = lookup_name or finger_cls.Meta.name
+        except AttributeError as e:
+            cls_name = finger_cls.__name__
+            msg = f"{cls_name}.Meta.name is required to identify your finger"
+            raise AttributeError(msg) from e
         if self._finger_registry.has_finger(lookup_name):
             raise DuplicatedFingerException(
                 f"{lookup_name} is already registered")
