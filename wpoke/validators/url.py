@@ -20,8 +20,7 @@ class URLValidator(object):
 
     # Host patterns
     hostname_re = (
-        r"[a-z" + ul + r"0-9](?:[a-z" + ul +
-        r"0-9-]{0,61}[a-z" + ul + r"0-9])?"
+        r"[a-z" + ul + r"0-9](?:[a-z" + ul + r"0-9-]{0,61}[a-z" + ul + r"0-9])?"
     )
     # Max length for domain name labels is 63 characters per RFC 1034 sec. 3.1
     domain_re = r"(?:\.(?!-)[a-z" + ul + r"0-9-]{1,63}(?<!-))*"

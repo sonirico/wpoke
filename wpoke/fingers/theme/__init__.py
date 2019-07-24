@@ -27,8 +27,7 @@ class ThemeFinger(BaseFinger):
                 user_agent=settings.user_agent,
                 max_redirects=settings.max_redirects,
             )
-            crawler = theme_crawler.WPThemeMetadataCrawler(self.session,
-                                                           crawler_config)
+            crawler = theme_crawler.WPThemeMetadataCrawler(self.session, crawler_config)
             themes = await crawler.get_theme(target)
         except wpoke.exceptions.BundledThemeException as e:
             print(e.message)

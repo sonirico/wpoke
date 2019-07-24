@@ -61,8 +61,7 @@ def truncate_theme_url(url: str) -> str:
     return regex.search(url).group()
 
 
-def remove_duplicated_theme_urls(
-        urls: Union[List[str], Iterator[str]]) -> Set[str]:
+def remove_duplicated_theme_urls(urls: Union[List[str], Iterator[str]]) -> Set[str]:
     """
     :param urls: All urls containing /wp-content/themes/
     :return: set of unique urls from protocol scheme to theme name
@@ -114,8 +113,7 @@ def extract_theme_path_candidates(url: str, html: str) -> Optional[List[str]]:
     return extract_theme_path_by_global_regex(url, html)
 
 
-def extract_theme_path_by_global_regex(url: str,
-                                       html: str) -> Optional[List[str]]:
+def extract_theme_path_by_global_regex(url: str, html: str) -> Optional[List[str]]:
     """ Performs a cross text search in the document, ignoring markup. """
     regex_str = r"(?://|https?)(?:.*?)/wp-content/themes/[\d\w\-_]+/"
     regex = re.compile(regex_str, re.IGNORECASE)
@@ -124,8 +122,7 @@ def extract_theme_path_by_global_regex(url: str,
     if result is None:
         return list()
 
-    return [match for match in result
-            if validate_url.is_same_origin(match, url)]
+    return [match for match in result if validate_url.is_same_origin(match, url)]
 
 
 @dataclass

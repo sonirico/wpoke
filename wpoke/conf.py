@@ -84,8 +84,7 @@ class Settings:
         ctxv.ContextVar("installed_fingers", default=INSTALLED_FINGERS),
     )
     max_redirects = SettingAttr(
-        "max_redirects", ctxv.ContextVar("max_redirects",
-                                         default=MAX_REDIRECTS)
+        "max_redirects", ctxv.ContextVar("max_redirects", default=MAX_REDIRECTS)
     )
     output_format = SettingAttr(
         "output_format",
