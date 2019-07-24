@@ -6,7 +6,7 @@ from aiohttp import ClientSession
 
 from .exceptions import DuplicatedFingerException
 from .finger import BaseFinger
-from .models import (HandResult, FingerResult)
+from .models import HandResult, FingerResult
 
 logger = logging.getLogger(__name__)
 
@@ -20,9 +20,7 @@ class _FingerRegistry(Dict):
     def finger_names(self) -> List[AnyStr]:
         return list(sorted(self.keys()))
 
-    def add_finger(self,
-                   lookup_name: AnyStr,
-                   finger: BaseFinger):
+    def add_finger(self, lookup_name: AnyStr, finger: BaseFinger):
         self[lookup_name] = finger
 
     def has_finger(self, finger_name: AnyStr):
@@ -43,17 +41,20 @@ class Hand:
     def registered_fingers(self):
         return self._finger_registry
 
-    def add_finger(self,
-                   finger_cls: Type[BaseFinger],
-                   lookup_name: Optional[AnyStr] = None):
+    def add_finger(
+        self,
+        finger_cls: Type[BaseFinger],
+        lookup_name: Optional[AnyStr] = None
+    ):
         """
         :param finger_cls:
         :param lookup_name:
         :raises DuplicatedFingerException
         :return:
         """
-        assert issubclass(finger_cls, BaseFinger), \
-            "All fingers must inherit from BaseFinger"
+        assert issubclass(
+            finger_cls, BaseFinger
+        ), "All fingers must inherit from BaseFinger"
         try:
             lookup_name = lookup_name or finger_cls.Meta.name
         except AttributeError as e:
@@ -61,8 +62,8 @@ class Hand:
             msg = f"{cls_name}.Meta.name is required to identify your finger"
             raise AttributeError(msg) from e
         if self._finger_registry.has_finger(lookup_name):
-            raise DuplicatedFingerException(
-                f"{lookup_name} is already registered")
+            msg = f"{lookup_name} is already registered"
+            raise DuplicatedFingerException(msg)
         self._finger_registry.add_finger(lookup_name,
                                          finger_cls(session=self.session))
 

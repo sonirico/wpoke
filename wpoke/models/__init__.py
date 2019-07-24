@@ -14,8 +14,8 @@ class TimeitResultMixin:
 
 
 class TimeitResultSerializerMixin:
-    started_at = serpy.MethodField(required=True, method='get_started_at')
-    finished_at = serpy.MethodField(required=True, method='get_finished_at')
+    started_at = serpy.MethodField(required=True, method="get_started_at")
+    finished_at = serpy.MethodField(required=True, method="get_finished_at")
 
     def _serialize_datetime(self, datetime_object):
         return datetime_object.isoformat()
@@ -51,7 +51,7 @@ class HandResultSerializer(serpy.Serializer, TimeitResultSerializerMixin):
     loaded_fingers = serpy.Field(required=True)
     serial_runtime = serpy.FloatField(required=True)
     parallel_runtime = serpy.FloatField(required=True)
-    runtime = serpy.FloatField(required=True, label='real_runtime')
+    runtime = serpy.FloatField(required=True, label="real_runtime")
     pokes = FingerResultSerializer(required=True, many=True)
-    started_at = serpy.MethodField(required=True, method='get_started_at')
-    finished_at = serpy.MethodField(required=True, method='get_finished_at')
+    started_at = serpy.MethodField(required=True, method="get_started_at")
+    finished_at = serpy.MethodField(required=True, method="get_finished_at")

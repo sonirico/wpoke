@@ -4,19 +4,19 @@ from typing import List, AnyStr
 
 @dataclass
 class WPThemeModelDisplay:
-    theme_name: AnyStr = 'Theme Name'
-    theme_uri: AnyStr = 'Theme URI'
-    description: AnyStr = 'Description'
-    author: AnyStr = 'Author'
-    author_uri: AnyStr = 'Author URI'
-    version: AnyStr = 'Version'
-    license: AnyStr = 'License'
-    license_uri: AnyStr = 'License URI'
-    tags: AnyStr = 'Tags'
-    text_domain: AnyStr = 'Text Domain'
-    included_translations: AnyStr = 'Included Translations'
-    template: AnyStr = 'Template'
-    status: AnyStr = 'Status'
+    theme_name: AnyStr = "Theme Name"
+    theme_uri: AnyStr = "Theme URI"
+    description: AnyStr = "Description"
+    author: AnyStr = "Author"
+    author_uri: AnyStr = "Author URI"
+    version: AnyStr = "Version"
+    license: AnyStr = "License"
+    license_uri: AnyStr = "License URI"
+    tags: AnyStr = "Tags"
+    text_domain: AnyStr = "Text Domain"
+    included_translations: AnyStr = "Included Translations"
+    template: AnyStr = "Template"
+    status: AnyStr = "Status"
 
     def __iter__(self):
         for k, v in self.__dict__.items():
