@@ -193,7 +193,6 @@ class WPThemeMetadataCrawler:
 
     async def get_theme(self, url: str) -> List[WPThemeMetadata]:
         try:
-
             html_content = await self.fetch_html_body(url)
 
             if not html_content:
@@ -227,8 +226,8 @@ class WPThemeMetadataCrawler:
             return theme_models
         except aiohttp.client.TooManyRedirects:
             raise general_exceptions.NastyTargetException
-        except aiohttp.client.ClientConnectionError:
-            raise general_exceptions.TargetInternalServerError
+        except aiohttp.client.ClientConnectionError as e:
+            raise general_exceptions.TargetConnectionError() from e
         except aiohttp.ServerTimeoutError:
             raise general_exceptions.TargetTimeout
         except aiohttp.client.ClientError:
