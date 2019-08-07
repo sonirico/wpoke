@@ -1,5 +1,13 @@
-class TargetException(Exception):
+class WpokeException(BaseException):
+    message = ""
+
+
+class TargetException(WpokeException):
     pass
+
+
+class TargetConnectionError(TargetException):
+    message = "Target is down or does no exist"
 
 
 class TargetNotFound(TargetException):
@@ -22,7 +30,7 @@ class MalformedBodyException(TargetException):
     pass
 
 
-class ValidationError(Exception):
+class ValidationError(WpokeException):
     def __init__(self, message, code=None):
         super().__init__(message)
 
@@ -30,7 +38,7 @@ class ValidationError(Exception):
         self.code = code
 
 
-class DuplicatedFingerException(Exception):
+class DuplicatedFingerException(WpokeException):
     pass
 
 
@@ -38,11 +46,11 @@ class DataStoreAttributeNotFound(AttributeError):
     pass
 
 
-class ThemePathMissingException(Exception):
+class ThemePathMissingException(WpokeException):
     pass
 
 
-class BundledThemeException(Exception):
+class BundledThemeException(WpokeException):
     message = (
         "The target might be using a package manager to bundle its "
         "assets, like webpack, parcel or browserify"

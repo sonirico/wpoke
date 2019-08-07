@@ -1,14 +1,11 @@
-import logging
 from datetime import datetime
 from typing import Any, AnyStr, Dict, Optional, List, Type
 
 from aiohttp import ClientSession
 
-from .exceptions import DuplicatedFingerException
+from .exceptions import DuplicatedFingerException, WpokeException
 from .finger import BaseFinger
 from .models import HandResult, FingerResult
-
-logger = logging.getLogger(__name__)
 
 
 def _now():
@@ -72,9 +69,10 @@ class Hand:
             result.started_at = _now()
             try:
                 result.data = await finger.run(target_url)
-            except Exception as e:
-                logger.error(str(e))
+            except WpokeException as e:
+                result.data = None
                 result.status = 1
+                result.errors.append(e.message)
             else:
                 result.status = 0
             result.finished_at = _now()

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import AnyStr, Dict, List
+from typing import AnyStr, Dict, List, Optional
 
 import serpy
 
@@ -31,6 +31,7 @@ class FingerResult(TimeitResultMixin):
     status: int
     finger_origin: AnyStr
     data: Dict
+    errors: Optional[List[AnyStr]] = []
 
 
 class FingerResultSerializer(serpy.Serializer, TimeitResultSerializerMixin):
@@ -38,6 +39,7 @@ class FingerResultSerializer(serpy.Serializer, TimeitResultSerializerMixin):
     finger_origin = serpy.StrField(required=True)
     runtime = serpy.FloatField(required=True)
     data = serpy.Field(required=True)
+    errors = serpy.Field(required=False)
 
 
 class HandResult(TimeitResultMixin):
