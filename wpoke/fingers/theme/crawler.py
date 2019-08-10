@@ -130,6 +130,7 @@ class WPThemeMetadataConfiguration:
     timeout: int = settings.timeout
     user_agent: str = settings.user_agent
     max_redirects: int = settings.max_redirects
+    ssl_enabled: bool = settings.ssl_enabled
 
 
 class WPThemeMetadataCrawler:
@@ -145,6 +146,7 @@ class WPThemeMetadataCrawler:
     @property
     def request_options(self):
         return dict(
+            ssl=self.http_config.ssl_enabled,
             timeout=self.http_config.timeout,
             max_redirects=self.http_config.max_redirects,
             headers={"User-Agent": self.http_config.user_agent},
