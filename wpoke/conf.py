@@ -20,7 +20,7 @@ USER_AGENT = (
 )
 
 INSTALLED_FINGERS = ("theme",)
-
+SSL_ENABLED = bool(os.getenv("SSL_ENABLED", False))
 MAX_REDIRECTS = int(os.getenv("MAX_REDIRECTS", 3))
 
 
@@ -73,6 +73,9 @@ class InvalidCliConfigurationException(Exception):
 
 
 class Settings:
+    ssl_enabled: SettingAttr = SettingAttr(
+        "ssl_enabled", ctxv.ContextVar("ssl_enabled", default=SSL_ENABLED)
+    )
     user_agent: SettingAttr = SettingAttr(
         "user_agent", ctxv.ContextVar("user_agent", default=USER_AGENT)
     )
