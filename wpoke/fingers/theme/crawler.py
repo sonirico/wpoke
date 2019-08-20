@@ -57,7 +57,7 @@ def truncate_theme_url(url: str) -> str:
     :param url: Full url containing the /wp-content/themes sub string
     :return: url from protocol scheme to theme name
     """
-    regex = re.compile(r".*/wp-content/themes/[_\-\w+]+/")
+    regex = re.compile(r".*/wp-content/themes/[_\-\w+\.]+/")
     return regex.search(url).group()
 
 
