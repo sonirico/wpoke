@@ -3,7 +3,6 @@ from collections import OrderedDict
 
 from setuptools import setup
 
-install_requires = []
 with io.open('requirements.txt', 'rt', encoding='utf8') as f:
     install_requires = f.readlines()
 
@@ -21,7 +20,7 @@ setup(
     maintainer='Marcos Sanchez',
     maintainer_email='marsanben92@gmail.com',
     description='WordPress information gathering tool',
-    log_description='WordPress information gathering tool',  # TODO
+    long_description='WordPress information gathering tool',  # TODO
     packages=['wpoke'],
     include_package_data=True,
     zip_safe=False,
