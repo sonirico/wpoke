@@ -66,7 +66,7 @@ def load_settings(cli_options):
         settings.user_agent = cli_options.useragent
     # Global timeout
     if cli_options.timeout:
-        settings.timeout = cli_options.timeout
+        settings.timeout = int(cli_options.timeout)
     # Output format
     if cli_options.render_format:
         if cli_options.render_format not in settings.ALLOWED_FORMATS:
