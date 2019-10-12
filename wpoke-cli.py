@@ -29,6 +29,9 @@ def extract_cli_options(hand: Hand):
     parser.add_argument('-tt', '--timeout', type=str, dest='timeout',
                         help='Global default timeout for all requests',
                         required=False)
+    parser.add_argument('-r', '--max-redirects', type=str, dest='max_redirects',
+                        help='Global default max redirects for each HTTP call',
+                        required=False)
     parser.add_argument('-f', '--format', type=str, dest='render_format',
                         help='Output format. {json|cli}',
                         required=False)
@@ -67,6 +70,9 @@ def load_settings(cli_options):
     # Global timeout
     if cli_options.timeout:
         settings.timeout = int(cli_options.timeout)
+    # Global max redirects
+    if cli_options.max_redirects:
+        settings.max_redirects = int(cli_options.max_redirects)
     # Output format
     if cli_options.render_format:
         if cli_options.render_format not in settings.ALLOWED_FORMATS:
