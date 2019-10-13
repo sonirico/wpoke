@@ -38,7 +38,7 @@ class MalformedBodyException(TargetException):
 
 
 class ThemePathMissingException(WpokeException):
-    message = "The target might not be reunning Wordpress"
+    message = "The target might not be running Wordpress"
 
 
 class BundledThemeException(WpokeException):
