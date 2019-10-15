@@ -1,4 +1,4 @@
-# Wpoke [![Build Status](https://travis-ci.org/sonirico/wpoke.svg?branch=master)](https://travis-ci.org/sonirico/wpoke) [![PyPI versions](https://img.shields.io/badge/python-3.7%20|%203.8~dev-blue.svg)](https://pypi.org/project/wpoke/)
+# Wpoke [![](https://github.com/sonirico/wpoke/workflows/build/badge.svg)](https://travis-ci.org/sonirico/wpoke) [![PyPI versions](https://img.shields.io/badge/python-3.7%20|%203.8~dev-blue.svg)](https://pypi.org/project/wpoke/)
 
 
 ## What's this
