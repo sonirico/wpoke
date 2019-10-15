@@ -1,0 +1,52 @@
+version: 2
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test-py3.8
+      - test-py3.7.4
+      - test-py3.6
+jobs:
+  test-3.8: &test-template
+    docker:
+      - image: circleci/python:3.8.0rc1
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run:
+          name: Install Fish
+          command: |
+            echo "deb http://ftp.debian.org/debian jessie-backports main" | sudo tee /etc/apt/sources.list.d/jessie-backports.list
+            sudo apt-get update
+            sudo apt-get -t jessie-backports install fish
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "setup.py" }}
+          - v1-dependencies-
+      - run:
+          name: Install dependencies
+          command: |
+            python -m venv venv || virtualenv venv
+            . venv/bin/activate
+            pip install -e .[dev]
+      - save_cache:
+          paths:
+            - ./venv
+          key: v1-dependencies-{{ checksum "setup.py" }}
+      - run:
+          name: Run tests
+          command: |
+            . venv/bin/activate
+            tox
+  test-3.7.4:
+    <<: *test-template
+    docker:
+      - image: circleci/python:3.7.4
+  test-3.6:
+    <<: *test-template
+    docker:
+      - image: circleci/python:3.6.9
+  test-nightly:
+    <<: &test-template
+    docker:
+      - image: circleci/python:latest
