@@ -5,7 +5,7 @@ import asyncio
 import json
 import sys
 
-import uvloop
+import wpoke
 from aiohttp import ClientSession
 
 from wpoke.conf import InvalidCliConfigurationException, settings
@@ -104,7 +104,7 @@ async def main():
 
 if __name__ == '__main__':
     try:
-        asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+        wpoke.set_event_loop_policy()
         loop = asyncio.get_event_loop()
         loop.run_until_complete(main())
     except KeyboardInterrupt:

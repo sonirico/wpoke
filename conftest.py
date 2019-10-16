@@ -1,10 +1,10 @@
-import asyncio
 import os
 
 import pytest
-import uvloop
 
-asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+from wpoke import set_event_loop_policy
+
+set_event_loop_policy()
 
 PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
 TESTS_ROOT = os.path.join(PROJECT_ROOT, 'tests')
