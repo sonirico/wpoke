@@ -2,6 +2,7 @@ import asyncio
 import itertools
 import re
 from dataclasses import dataclass
+from io import StringIO
 from typing import List, Optional, Set, Iterator, Union
 
 import aiohttp
@@ -82,7 +83,12 @@ def extract_theme_path_candidates(url: str, html: str) -> Optional[List[str]]:
             by the theme creator intentionally.
     """
 
-    tree = etree.HTML(html)
+    html = html.strip()
+    if not html:
+        return None
+
+    parser = etree.HTMLParser()
+    tree = etree.parse(StringIO(html), parser)
 
     if tree is None:
         return None
