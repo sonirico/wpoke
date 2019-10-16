@@ -3,7 +3,6 @@ dist: xenial
 sudo: false
 language: python
 python:
-  - "3.6"
   - "3.7.4"
   - "3.8"
   - "nightly"
