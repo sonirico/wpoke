@@ -1,5 +1,4 @@
-# Wpoke [![Build Status](https://travis-ci.org/sonirico/wpoke.svg?branch=master)](https://travis-ci.org/sonirico/wpoke) [![PyPI versions](https://img.shields.io/badge/python-3.7%20|%203.8~dev-blue.svg)](https://pypi.org/project/wpoke/)
-
+# wpoke [![Build Status](https://img.shields.io/travis/sonirico/wpoke.svg?branch=master&style=flat-square)](https://travis-ci.org/sonirico/wpoke) [![PyPI versions](https://img.shields.io/badge/python-3.7%20|%203.8-blue.svg?style=flat-square)](https://pypi.org/project/wpoke/) [![PyPi versions](https://img.shields.io/pypi/v/wpoke?style=flat-square)](https://pypi.org/project/wpoke/)
 
 ## What's this
 You much probably have landed off here while seeking some python scripts online
@@ -91,6 +90,7 @@ def custom_version_extractor(url):
     response = requests.get(url)
     data = my_response_parser(response.text())
     return data
-    
-hand.poke()
+
+if __name__ == "__main__":
+    hand.poke()
 ```
