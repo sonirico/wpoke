@@ -1,7 +1,7 @@
 import io
 from collections import OrderedDict
 
-from setuptools import setup
+from setuptools import find_packages, setup
 
 with io.open('requirements.txt', 'rt', encoding='utf8') as f:
     install_requires = f.readlines()
@@ -21,7 +21,7 @@ setup(
     maintainer_email='marsanben92@gmail.com',
     description='WordPress information gathering tool',
     long_description='WordPress information gathering tool',  # TODO
-    packages=['wpoke'],
+    packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
     platforms='any',
