@@ -8,7 +8,7 @@ with io.open('requirements.txt', 'rt', encoding='utf8') as f:
 
 setup(
     name='wpoke',
-    version='0.1.0',
+    version='0.1.1',
     url='https://pypi.org/project/wpoke/',
     project_urls=OrderedDict((
         ('Code', 'https://github.com/sonirico/wpoke/'),
