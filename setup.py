@@ -35,4 +35,7 @@ setup(
         'docs': [
         ]
     },
+    scripts=[
+        'wpoke/bin/wpoke-cli'
+    ],
 )

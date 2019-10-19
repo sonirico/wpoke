@@ -40,10 +40,8 @@ should I will stick back to pip for now.
 ##### Install with setup.py
 
 ```shell
-# clone the repo
 git clone git@github.com:sonirico/wpoke.git
 cd wpoke/
-# Within a virtualenv or not
 python setup.py install
 ```
 
@@ -54,13 +52,11 @@ pip install -U pip  # Make sure pip is updated
 pip install wpoke
 ```
 
-## Run from cli
+## Run as command line tool
 
 ```shell
-python3.7 -m venv venv
-source venv/bin/activate
-python setup.py install
-./wpoke-cli.py https://wordpress.com/
+pip install wpoke
+wpoke-cli https://wp-target-site.com/
 ```
 
 ## Run on docker
@@ -81,7 +77,7 @@ As of now, configurable parameters are:
 ## Examples
 
 ```shell
-./wpoke-cli.py --max-redirects=5 --timeout 5 --user-agent "Mozilla/5.0" https://my-wp-target.com
+wpoke-cli --max-redirects=5 --timeout 5 --user-agent "Mozilla/5.0" https://my-wp-target.com
 ```
 
 ## Roll down your own checks (aka fingers)
