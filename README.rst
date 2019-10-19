@@ -1,0 +1,122 @@
+wpoke |Build Status| |PyPI versions| |PyPi versions|
+====================================================
+
+What's this
+-----------
+
+You much probably have landed off here while seeking some python scripts
+online to gather some information from WordPress sites without too much
+effort. I regret to say that this library, while I actively seek to make
+it usable by other applications, it may not meet your expectations. On
+one side, it's being rolled down employing ``asyncio``, low-level
+parsers such as ``lxml`` and of course python>=3.7. (We only python3 in
+this house). Either way, not a too much exotic stack but modern enough
+to require you to prepare more complex environments in order to run it.
+Of course I know about other tools that ship with all the ecosystem
+needed to extract this information, such as ``scrapy``, but I wanted to
+get my hands dirty with new tech... Besides, who does not want to
+reinvent the wheel from time to time?
+
+On the other hand, it is still under heavy development and there is not
+much info you can scrape using this tool. Hence, you are very welcome to
+contribute! :)
+
+Featuring
+---------
+
+-  **Theme metadata information**
+
+   -  Theme name, version, description and URL
+   -  Child themes (template)
+   -  Included translations
+   -  Screenshot (featured image)
+   -  Status
+   -  Tags
+   -  License and license URL
+   -  Version
+   -  Description and text domain
+   -  Author name and URL
+
+Installing
+----------
+
+[STRIKEOUT:I'd rather have a deterministic dependency manager. That's
+why this projects employs poetry]. Ejem well, I'm pretty tired of
+running into weird issues on different environments due to these exotic
+dep managers, should I will stick back to pip for now.
+
+.. _install-with-setuppy:
+
+Install with setup.py
+'''''''''''''''''''''
+
+.. code:: shell
+
+   git clone git@github.com:sonirico/wpoke.git
+   cd wpoke/
+   python setup.py install
+
+Install from pypi
+'''''''''''''''''
+
+.. code:: shell
+
+   pip install -U pip  # Make sure pip is updated
+   pip install wpoke
+
+Run as command line tool
+------------------------
+
+.. code:: shell
+
+   pip install wpoke
+   wpoke-cli https://wp-target-site.com/
+
+Run on docker
+-------------
+
+.. code:: shell
+
+   docker run sonirico/wpoke:latest https://wp-target-site.com
+
+Configuration
+-------------
+
+As of now, configurable parameters are:
+
+-  max number of redirects: ``max-redirects``
+-  global timeout: ``timeout``
+-  user-agent: ``user-agent``
+
+Examples
+--------
+
+.. code:: shell
+
+   wpoke-cli --max-redirects=5 --timeout 5 --user-agent "Mozilla/5.0" https://my-wp-target.com
+
+Roll down your own checks (aka fingers)
+---------------------------------------
+
+.. code:: python
+
+   import requests
+   from wpoke.hand import Hand
+
+   hand = Hand()
+
+   @hand.add_finger
+   def custom_version_extractor(url):
+       response = requests.get(url)
+       data = my_response_parser(response.text())
+       return data
+
+   if __name__ == "__main__":
+       hand.poke()
+
+.. |Build Status| image:: https://img.shields.io/travis/sonirico/wpoke.svg?branch=master&style=flat-square
+   :target: https://travis-ci.org/sonirico/wpoke
+.. |PyPI versions| image:: https://img.shields.io/badge/python-3.7%20|%203.8-blue.svg?style=flat-square
+   :target: https://pypi.org/project/wpoke/
+.. |PyPi versions| image:: https://img.shields.io/pypi/v/wpoke?style=flat-square
+   :target: https://pypi.org/project/wpoke/
