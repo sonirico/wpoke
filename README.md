@@ -63,6 +63,13 @@ python setup.py install
 ./wpoke-cli.py https://wordpress.com/
 ```
 
+## Run on docker
+
+```shell
+docker run sonirico/wpoke:latest https://wp-target-site.com
+```
+
+
 ## Configuration
 
 As of now, configurable parameters are:
