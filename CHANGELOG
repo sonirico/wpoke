@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [master]
+
+- Added build and install test stages for tox
+- Fixed segregated version number, split in several files
+
 ## [0.1.2 - 2019-10-19]
 
 - Fixed entrypoint script not being included within PYTHONPATH

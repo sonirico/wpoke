@@ -20,30 +20,49 @@ def extract_cli_options(hand: Hand):
     Based on the cli options configured in every registry, load the
     pertinent settings from them
     """
-    parser = argparse.ArgumentParser(
-        description='WordPress information gathering tool')
-    parser.add_argument('url', help='Target WordPress site. Can be any URL')
-    parser.add_argument('-u', '--user-agent', type=str, dest='useragent',
-                        help='User agent to use',
-                        required=False)
-    parser.add_argument('-tt', '--timeout', type=str, dest='timeout',
-                        help='Global default timeout for all requests',
-                        required=False)
-    parser.add_argument('-r', '--max-redirects', type=str, dest='max_redirects',
-                        help='Global default max redirects for each HTTP call',
-                        required=False)
-    parser.add_argument('-f', '--format', type=str, dest='render_format',
-                        help='Output format. {json|cli}',
-                        required=False)
+    parser = argparse.ArgumentParser(description="WordPress information gathering tool")
+    parser.add_argument("url", help="Target WordPress site. Can be any URL")
+    parser.add_argument(
+        "-u",
+        "--user-agent",
+        type=str,
+        dest="useragent",
+        help="User agent to use",
+        required=False,
+    )
+    parser.add_argument(
+        "-tt",
+        "--timeout",
+        type=str,
+        dest="timeout",
+        help="Global default timeout for all requests",
+        required=False,
+    )
+    parser.add_argument(
+        "-r",
+        "--max-redirects",
+        type=str,
+        dest="max_redirects",
+        help="Global default max redirects for each HTTP call",
+        required=False,
+    )
+    parser.add_argument(
+        "-f",
+        "--format",
+        type=str,
+        dest="render_format",
+        help="Output format. {json|cli}",
+        required=False,
+    )
 
     for lookup_key, finger in hand.registered_fingers:
-        short_arg_name = getattr(finger.Cli, 'short_flag', None)
-        long_arg_name = getattr(finger.Cli, 'long_flag', None)
-        help_text = getattr(finger.Cli, 'help_text', None)
-        required = getattr(finger.Cli, 'required', False)
+        short_arg_name = getattr(finger.Cli, "short_flag", None)
+        long_arg_name = getattr(finger.Cli, "long_flag", None)
+        help_text = getattr(finger.Cli, "help_text", None)
+        required = getattr(finger.Cli, "required", False)
 
         pargs = []
-        pkwargs = {'dest': lookup_key, 'action': 'store_true'}
+        pkwargs = {"dest": lookup_key, "action": "store_true"}
 
         if short_arg_name:
             pargs.append(short_arg_name)
@@ -51,9 +70,9 @@ def extract_cli_options(hand: Hand):
             pargs.append(long_arg_name)
 
         if help_text:
-            pkwargs['help'] = help_text
+            pkwargs["help"] = help_text
         if required is not None:
-            pkwargs['required'] = required
+            pkwargs["required"] = required
 
         parser.add_argument(*pargs, **pkwargs)
 
@@ -76,7 +95,7 @@ def load_settings(cli_options):
     # Output format
     if cli_options.render_format:
         if cli_options.render_format not in settings.ALLOWED_FORMATS:
-            message = f'unknown format: {cli_options.render_format}'
+            message = f"unknown format: {cli_options.render_format}"
             raise InvalidCliConfigurationException(message)
         settings.output_format = cli_options.render_format
 
@@ -102,7 +121,7 @@ async def main():
         print(json.dumps(hand_serializer.data, indent=2))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     try:
         wpoke.set_event_loop_policy()
         loop = asyncio.get_event_loop()

@@ -3,6 +3,8 @@ from collections import OrderedDict
 
 from setuptools import find_packages, setup
 
+from wpoke.version import VERSION
+
 with io.open('README.rst', 'rt', encoding='utf8') as f:
     readme = f.read()
 
@@ -11,7 +13,7 @@ with io.open('requirements.txt', 'rt', encoding='utf8') as f:
 
 setup(
     name='wpoke',
-    version='0.1.3',
+    version=VERSION,
     url='https://pypi.org/project/wpoke/',
     project_urls=OrderedDict((
         ('Code', 'https://github.com/sonirico/wpoke/'),
