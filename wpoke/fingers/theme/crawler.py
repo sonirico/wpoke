@@ -7,9 +7,11 @@ from typing import List, Optional, Set, Iterator, Union
 
 import aiohttp
 from aiohttp import ClientSession
+
 from lxml import etree
 
 from wpoke import exceptions as general_exceptions
+from wpoke.client import URL
 from wpoke.conf import settings
 from wpoke.exceptions import ThemePathMissingException, BundledThemeException
 from wpoke.store import peek_store
@@ -70,56 +72,7 @@ def remove_duplicated_theme_urls(urls: Union[List[str], Iterator[str]]) -> Set[s
     return {truncate_theme_url(url) for url in urls}
 
 
-def extract_theme_path_candidates(url: str, html: str) -> Optional[List[str]]:
-    """ Scrapes all possible urls in a html document potentially
-        disclosing available active themes
-    :param url: Target website
-    :param html: Content body of the response of url (Redirects are followed)
-    :raises: MalformedBodyException
-    :return: list of candidate urls, gathered by different engines:
-        - URLs present on either <link> or <script> tags
-        - URLs present in the document, including comments. Sometimes, theme
-            information is left as debugging info by the developer or displayed
-            by the theme creator intentionally.
-    """
-
-    html = html.strip()
-    if not html:
-        return None
-
-    parser = etree.HTMLParser()
-    tree = etree.parse(StringIO(html), parser)
-
-    if tree is None:
-        return None
-
-    xpath_candidates = [
-        '//link[contains(@href, "/wp-content/themes/")]/@href',
-        '//script[contains(@src, "/wp-content/themes/")]/@src',
-    ]
-
-    # TODO: Check that candidate urls start with the same domain as the
-    # supplied url!
-
-    # tree.xpath returns a list of string values matching the path.
-    # A single list of them is created and then converted to a set.
-    matches = [tree.xpath(xpath) for xpath in xpath_candidates]
-    matches_flat = itertools.chain.from_iterable(matches)
-
-    candidates = list(remove_duplicated_theme_urls(matches_flat))
-
-    if candidates:
-        return candidates
-
-    # As a last resort, search by regex in comments. Some themes leave
-    # tracks of the theme name as html comments deliberately.
-
-    # TODO: Somehow, mark this result as less valid as any other extracted
-    # from DOM elements.
-    return extract_theme_path_by_global_regex(url, html)
-
-
-def extract_theme_path_by_global_regex(url: str, html: str) -> Optional[List[str]]:
+def extract_theme_path_by_global_regex(url: URL, html: str) -> Optional[List[str]]:
     """ Performs a cross text search in the document, ignoring markup. """
     regex_str = r"(?://|https?)(?:.*?)/wp-content/themes/[\d\w\-_]+/"
     regex = re.compile(regex_str, re.IGNORECASE)
@@ -128,7 +81,7 @@ def extract_theme_path_by_global_regex(url: str, html: str) -> Optional[List[str
     if result is None:
         return list()
 
-    return [match for match in result if validate_url.is_same_origin(match, url)]
+    return [match for match in result if validate_url.is_same_origin(match, str(url))]
 
 
 @dataclass
@@ -144,7 +97,9 @@ class WPThemeMetadataCrawler:
         self,
         http_session: ClientSession,
         http_config: Optional[WPThemeMetadataConfiguration] = None,
+        canonical_url: Optional[URL] = None,
     ):
+        self.canonical_url = canonical_url
         self.session = http_session
         self.http_config = http_config or WPThemeMetadataConfiguration()
         self.store = peek_store()
@@ -163,6 +118,10 @@ class WPThemeMetadataCrawler:
             method=http_method.lower(), url=target_url, **self.request_options
         ) as response:
             body = await response.text()
+            if not self.canonical_url:
+                # If there have been redirects, the canonical url for the scan
+                # is not the provided, but the resulting of the redirection.
+                self.canonical_url = URL(str(response.url))
             return response.status, body
 
     async def fetch_html_body(self, url: str):
@@ -199,6 +158,64 @@ class WPThemeMetadataCrawler:
             model.set_featured_image(screenshot)
         return model
 
+    def extract_theme_path_candidates(self, html: str) -> Optional[List[str]]:
+        """ Scrapes all possible urls in a html document potentially
+            disclosing available active themes
+        :param url: Target website
+        :param html: Content body of the response of url (Redirects are followed)
+        :raises: MalformedBodyException
+        :return: list of candidate urls, gathered by different engines:
+            - URLs present on either <link> or <script> tags
+            - URLs present in the document, including comments. Sometimes, theme
+                information is left as debugging info by the developer or displayed
+                by the theme creator intentionally.
+        """
+
+        html = html.strip()
+        if not html:
+            return None
+
+        parser = etree.HTMLParser()
+        tree = etree.parse(StringIO(html), parser)
+
+        if tree is None:
+            return None
+
+        xpath_candidates = [
+            '//link[contains(@href, "/wp-content/themes/")]/@href',
+            '//script[contains(@src, "/wp-content/themes/")]/@src',
+        ]
+
+        # TODO: Check that candidate urls start with the same domain as the
+        # supplied url!
+
+        # tree.xpath returns a list of string values matching the path.
+        # A single list of them is created and then converted to a set.
+        matches = [tree.xpath(xpath) for xpath in xpath_candidates]
+        matches_flat = itertools.chain.from_iterable(matches)
+
+        candidates = list(remove_duplicated_theme_urls(matches_flat))
+
+        if not candidates:
+            # As a last resort, search by regex in comments. Some themes leave
+            # tracks of the theme name as html comments deliberately.
+            candidates = extract_theme_path_by_global_regex(self.canonical_url, html)
+
+        # TODO: Somehow, mark this result as less valid as any other extracted
+        # from DOM elements.
+
+        # URI's might not have scheme set. E.g: //domain.com/wp-content/theme/style.css.
+        # That allows browsers to automatically determine the protocol scheme from
+        # the initial target url.
+        initial_scheme = self.canonical_url.scheme
+        result = []
+        for candidate in candidates:
+            url_candidate = URL(candidate)
+            if not url_candidate.has_scheme():
+                url_candidate.set_scheme(initial_scheme)
+            result.append(str(url_candidate))
+        return result
+
     async def get_theme(self, url: str) -> List[WPThemeMetadata]:
         try:
             html_content = await self.fetch_html_body(url)
@@ -206,7 +223,7 @@ class WPThemeMetadataCrawler:
             if not html_content:
                 raise general_exceptions.MalformedBodyException
 
-            candidates = extract_theme_path_candidates(url, html_content)
+            candidates = self.extract_theme_path_candidates(html_content)
 
             if not candidates:
                 raise ThemePathMissingException
