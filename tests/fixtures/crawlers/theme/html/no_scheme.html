@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sample wordpress site</title>
+
+    <!-- consider normal.wp.com is served with HTTPS -->
+    <link href="//normal.wp.com/wp-content/themes/unir.net/style.css" />
+
+</head>
+<body>
+Im just a dummy wordpress site, with nothing at all to show. But hey! I
+have several links to my theme, both as links and scripts. Happy crawling!
+
+<script src="//normal.wp.com/wp-content/hardcodedjs/main.js" >
+    // This script should not be fetched when extracting candidate
+    // theme urls
+</script>
+<script src="//normal.wp.com/wp-content/themes/unir.net/js/main.js" ></script>
+</body>
+</html>

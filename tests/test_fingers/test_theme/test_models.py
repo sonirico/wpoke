@@ -10,15 +10,14 @@ class TestWPThemeMetadata(unittest.TestCase):
         serializer = WPThemeMetadataSerializer(wp_metadata_model)
         w_serialized = serializer.data
 
-        self.assertIsInstance(w_serialized['tags'], list)
-        self.assertIsNone(w_serialized['theme_name'])
+        self.assertIsInstance(w_serialized["tags"], list)
+        self.assertIsNone(w_serialized["theme_name"])
 
     def test_serialize_tags_field(self):
         wp_metadata_model = WPThemeMetadata()
-        wp_metadata_model.tags = 'hacking, programming  , devops'
+        wp_metadata_model.tags = "hacking, programming  , devops"
 
         serializer = WPThemeMetadataSerializer(wp_metadata_model)
         w_serialized = serializer.data
 
-        self.assertListEqual(w_serialized['tags'], ['hacking', 'programming',
-                                                    'devops'])
+        self.assertListEqual(w_serialized["tags"], ["hacking", "programming", "devops"])

@@ -7,11 +7,11 @@ from wpoke import set_event_loop_policy
 set_event_loop_policy()
 
 PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
-TESTS_ROOT = os.path.join(PROJECT_ROOT, 'tests')
-FIXTURES_ROOT = os.path.join(TESTS_ROOT, 'fixtures')
+TESTS_ROOT = os.path.join(PROJECT_ROOT, "tests")
+FIXTURES_ROOT = os.path.join(TESTS_ROOT, "fixtures")
 
 
-@pytest.fixture(scope='class')
+@pytest.fixture(scope="class")
 def fixture_file_content(request):
     def inner(cls, file_name):
         with open(os.path.join(FIXTURES_ROOT, file_name)) as fd:
@@ -21,7 +21,7 @@ def fixture_file_content(request):
     request.cls.fixture_content = inner
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def read_fixture():
     def inner(file_name):
         with open(os.path.join(FIXTURES_ROOT, file_name)) as fd:

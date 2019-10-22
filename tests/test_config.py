@@ -5,7 +5,7 @@ from wpoke.conf import SettingAttr
 
 
 class TestSettings:
-    test_key = SettingAttr('test_key_b', ContextVar('no_test', default=1))
+    test_key = SettingAttr("test_key_b", ContextVar("no_test", default=1))
 
 
 class TestSettingsSetAttribute(unittest.TestCase):

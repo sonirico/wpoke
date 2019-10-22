@@ -4,6 +4,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [master]
 
+- Fixed internal server error caused when target sites returned
+  links to resources without protocol scheme
 - Added build and install test stages for tox
 - Fixed segregated version number, split in several files
 
