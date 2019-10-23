@@ -4,7 +4,7 @@ RUN apk add --update --no-cache git g++ gcc make \
     libxml2-dev py3-lxml libxslt-dev libffi-dev openssl-dev \
     shared-mime-info
 
-ARG VERSION="0.1.1"
+ARG VERSION="0.1.4"
 ARG UVLOOP="0.13.0"
 
 WORKDIR /

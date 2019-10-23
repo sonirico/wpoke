@@ -4,10 +4,16 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [master]
 
+## [0.1.4 - 2019-10-23]
+
 - Fixed internal server error caused when target sites returned
   links to resources without protocol scheme
 - Added build and install test stages for tox
 - Fixed segregated version number, split in several files
+
+## [0.1.3 - 2019-10-19]
+
+- Added pypi documentation
 
 ## [0.1.2 - 2019-10-19]
 
