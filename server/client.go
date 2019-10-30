@@ -16,28 +16,23 @@ var requestParser = btp.NewRequestParser()
 type Client struct {
 	Id     uint64
 	socket net.Conn
-	store  *Store
 
 	requests  chan *btp.Request
 	responses chan *btp.Response
 }
 
-func NewClient(id uint64, conn net.Conn, store *Store) *Client {
+func NewClient(id uint64, conn net.Conn) *Client {
 	return &Client{
 		Id:        id,
 		socket:    conn,
-		store:     store,
 		requests:  make(chan *btp.Request),
 		responses: make(chan *btp.Response),
 	}
 }
 
-func (c *Client) Join() {
-	c.store.Join <- c
-}
-
-func (c *Client) Leave() {
-	c.store.Leave <- c
+func (c *Client) Enter(joinerLeaver JoinerLeaver) {
+	defer joinerLeaver.Leave(c)
+	joinerLeaver.Join(c)
 }
 
 func (c *Client) Exit() {
@@ -49,7 +44,7 @@ func (c *Client) Exit() {
 	close(c.responses)
 }
 
-func (c *Client) Read() {
+func (c *Client) Read(orderTaker OrderTaker) {
 	for {
 		netData, err := bufio.NewReader(c.socket).ReadString('\n')
 		if err != nil {
@@ -60,10 +55,10 @@ func (c *Client) Read() {
 		}
 
 		request := requestParser.Parse(netData)
-		c.printRequest(request)
+		c.printRequest(request) // TODO: Use a logger here
 
 		if request.IsValid() {
-			c.store.Orders <- NewOrder(request, c)
+			orderTaker.TakeOrder(NewOrder(request, c))
 		} else {
 			c.responses <- btp.NewResponse(request.Error.Code, request.Error.Message)
 		}

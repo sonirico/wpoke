@@ -7,11 +7,10 @@ import (
 	"pokeStore/cli"
 )
 
-func worker(client *Client) {
-	client.Join()
-	defer func() { client.Leave() }()
+func worker(client *Client, store *Store) {
+	client.Enter(store)
 	go client.Write()
-	client.Read()
+	client.Read(store)
 }
 
 func main() {
@@ -38,8 +37,8 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		client := NewClient(lastClientId, conn, store)
+		client := NewClient(lastClientId, conn)
 		// TODO: Implement rate limiting
-		go worker(client)
+		go worker(client, store)
 	}
 }

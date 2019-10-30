@@ -5,11 +5,28 @@ import (
 	"pokeStore/btp"
 )
 
-type Store struct {
-	Orders chan *Order
+type OrderTaker interface {
+	TakeOrder(order *Order)
+}
 
-	Join  chan *Client
-	Leave chan *Client
+type Joiner interface {
+	Join(*Client)
+}
+
+type Leaver interface {
+	Leave(*Client)
+}
+
+type JoinerLeaver interface {
+	Joiner
+	Leaver
+}
+
+type Store struct {
+	orders chan *Order
+
+	join  chan *Client
+	leave chan *Client
 
 	clients map[*Client]bool
 	baskets map[string]*Basket
@@ -19,9 +36,9 @@ type Store struct {
 
 func NewStore() *Store {
 	store := &Store{
-		Orders:  make(chan *Order),
-		Join:    make(chan *Client),
-		Leave:   make(chan *Client),
+		orders:  make(chan *Order),
+		join:    make(chan *Client),
+		leave:   make(chan *Client),
 		clients: make(map[*Client]bool),
 		baskets: make(map[string]*Basket),
 	}
@@ -120,15 +137,27 @@ func (s *Store) dispatch(order *Order) {
 	}
 }
 
+func (s *Store) Join(c *Client) {
+	s.join <- c
+}
+
+func (s *Store) Leave(c *Client) {
+	s.leave <- c
+}
+
+func (s *Store) TakeOrder (order *Order) {
+	s.orders <- order
+}
+
 func (s *Store) Run() {
 	for {
 		select {
-		case client := <-s.Join:
+		case client := <-s.join:
 			s.clients[client] = true
-		case client := <-s.Leave:
+		case client := <-s.leave:
 			delete(s.clients, client)
 			client.Exit()
-		case order := <-s.Orders:
+		case order := <-s.orders:
 			s.dispatch(order)
 		}
 	}
