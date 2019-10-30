@@ -89,7 +89,7 @@ func NewUserInterface(client *Client) *UserInterface {
 	optionsList.AddLink('1', "Create basket", ui.GetSwitchToPage("create-basket"))
 	optionsList.AddLink('2', "Add item to basket", ui.GetSwitchToPage("add-item-to-basket"))
 	optionsList.AddLink('3', "Checkout basket", ui.GetSwitchToPage("checkout-basket"))
-	optionsList.AddLink('4', "Drop checkout", ui.GetSwitchToPage("drop-basket"))
+	optionsList.AddLink('4', "Drop basket", ui.GetSwitchToPage("drop-basket"))
 	optionsList.AddLink('0', "Quit", ui.Quit)
 
 	pages.AddPage("landing", optionsList, true, true)
