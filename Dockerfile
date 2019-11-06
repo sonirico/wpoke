@@ -17,4 +17,4 @@ RUN git checkout ${VERSION} \
     && pip install --no-cache -r requirements.lock \
     && python setup.py install;
 
-ENTRYPOINT ["python", "wpoke-cli.py"]
+ENTRYPOINT ["wpoke-cli"]
