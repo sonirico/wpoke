@@ -17,4 +17,5 @@ RUN git checkout ${VERSION} \
     && pip install --no-cache -r requirements.lock \
     && python setup.py install;
 
-ENTRYPOINT ["wpoke-cli"]
+ENTRYPOINT [ "wpoke-cli" ]
+CMD [ "katodia.com" ]
