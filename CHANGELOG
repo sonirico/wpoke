@@ -4,6 +4,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [master]
 
+- Fixed docker entrypoint directive lacking sorrounding spaces
 - Fixed docker image entrypoint, still trying to run wpoke script
   as an standalone asset
 
